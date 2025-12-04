@@ -22,7 +22,7 @@ Github Flowです。なのでブランチのマージ後は必ず削除をする
 
 ## ホスティング先
  - フロントエンド（React）：Vercel or Heroku or CloudFront
- - バックエンド（Laravel）：Heroku or AWS  
+ - バックエンド（Laravel）：Heroku or AWS
 ※フロントエンド担当の方はホスティング先を決め次第norman6464に連絡ください。
 
 ## データベース設計（ER図）
