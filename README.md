@@ -28,7 +28,7 @@ Github Flowです。なのでブランチのマージ後は必ず削除をする
 ## データベース設計（ER図）
 このカラムなどを参考にしてDOA（データ指向プログラミング）に沿ってUIなどを作ってください。出ないとデータベースの作り直し = 処理ロジック全体の作り直しがおき、Laravel → ReactのJSONデータのやり取りで不備が起きプロジェクトの遅延が起きます。  
 
-[DOA](https://zenn.dev/chillnn_tech/articles/e78a76f94ad45a)  
+[DOPの概念](https://zenn.dev/chillnn_tech/articles/e78a76f94ad45a)  
 
 **テーブル名**  
  - users
