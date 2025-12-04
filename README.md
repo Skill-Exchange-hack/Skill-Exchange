@@ -51,6 +51,18 @@ Github Flowです。なのでブランチのマージ後は必ず削除をする
 ## UI/UXの図
 norman6464のチャットにFigmaなどで完成させた図などをください。そしたらこちらでREADMEの編集をします。
 
-## アーキテクチャー図
+## プロジェクト導入手順
+**フロントエンド（React）の場合**
+```
+npm install
+```
 
+**バックエンドの場合**
+```
+composer install
+```
+node_modulesのインストール
+```
+npm install
+```
 
