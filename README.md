@@ -66,9 +66,18 @@ node_modulesのインストール
 npm install
 ```
 
+### 注意事項
+
 今回のバックエンドの導入手順の際に.envファイルの編集が必ず必要になります  
 なのでcodespaceなどで設定する際にはnorman6464に連絡をください。
 
 Laravelは今回APIサーバーとして起動をしているのでphp artisan serveコマンドを打った際にはpunlic/index.phpのファイルはレンダリングをしません。  
 
 なので設定では必ずjson形式でデータを返すようにできています。
+
+
+### 現在のバックエンドの変更
+1. CRUDの実装完了
+2. routes/api.phpの編集
+3. config/cors.phpの編集（ローカルのReactのポートのみ使用許可）
+4. SQLiteのデータベース変更
