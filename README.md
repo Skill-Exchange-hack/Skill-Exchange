@@ -28,7 +28,7 @@ Github Flowです。なのでブランチのマージ後は必ず削除をする
 ## データベース設計（ER図）
 このカラムなどを参考にしてDOA（データ指向プログラミング）に沿ってUIなどを作ってください。出ないとデータベースの作り直し = 処理ロジック全体の作り直しがおき、Laravel → ReactのJSONデータのやり取りで不備が起きプロジェクトの遅延が起きます。  
 
-[DOA](https://zenn.dev/chillnn_tech/articles/e78a76f94ad45a)  
+[DOPの概念](https://zenn.dev/chillnn_tech/articles/e78a76f94ad45a)  
 
 **テーブル名**  
  - users
@@ -66,9 +66,18 @@ node_modulesのインストール
 npm install
 ```
 
+### 注意事項
+
 今回のバックエンドの導入手順の際に.envファイルの編集が必ず必要になります  
 なのでcodespaceなどで設定する際にはnorman6464に連絡をください。
 
 Laravelは今回APIサーバーとして起動をしているのでphp artisan serveコマンドを打った際にはpunlic/index.phpのファイルはレンダリングをしません。  
 
 なので設定では必ずjson形式でデータを返すようにできています。
+
+
+### 現在のバックエンドの変更
+1. CRUDの実装完了
+2. routes/api.phpの編集
+3. config/cors.phpの編集（ローカルのReactのポートのみ使用許可）
+4. SQLiteのデータベース変更
