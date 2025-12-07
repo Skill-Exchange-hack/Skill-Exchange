@@ -81,3 +81,27 @@ Laravelは今回APIサーバーとして起動をしているのでphp artisan s
 2. routes/api.phpの編集
 3. config/cors.phpの編集（ローカルのReactのポートのみ使用許可）
 4. SQLiteのデータベース変更
+
+## フロントエンドの人がバックエンドを動かす手順
+1. composer install コマンド
+2. .envファイルの編集
+3. database/database.sqliteのファイルを作成
+4. php artisan migrate コマンド
+
+
+あとはcurlコマンドで確かめる
+
+```
+curl -X POST http://127.0.0.1:8000/api/users \
+     -H "Content-Type: application/json" \
+     -H "Accept: application/json" \
+     -d '{"name":"norman"}'
+```
+
+```
+curl -X GET http://127.0.0.1:8000/api/users \
+     -H "Accept: application/json"
+
+```
+
+この二つのコマンドでJSONの返却
