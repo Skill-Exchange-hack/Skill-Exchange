@@ -1,28 +1,33 @@
+import { Link, useLocation } from 'react-router-dom';
 import '../styles/Navigation.css';
 
-function Navigation({ onNavigate, currentPage }) {
+function Navigation() {
+  const location = useLocation();
+
+  const isActive = (path) => location.pathname === path;
+
   return (
     <nav className="navigation">
       <div className="nav-brand">スキル交換</div>
       <div className="nav-links">
-        <button 
-          className={`nav-link ${currentPage === 'home' ? 'active' : ''}`}
-          onClick={() => onNavigate('home')}
+        <Link 
+          to="/" 
+          className={`nav-link ${isActive('/') ? 'active' : ''}`}
         >
           ホーム
-        </button>
-        <button 
-          className={`nav-link ${currentPage === 'profile' ? 'active' : ''}`}
-          onClick={() => onNavigate('profile')}
+        </Link>
+        <Link 
+          to="/profile" 
+          className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
         >
           プロフィール
-        </button>
-        <button 
-          className={`nav-link ${currentPage === 'settings' ? 'active' : ''}`}
-          onClick={() => onNavigate('settings')}
+        </Link>
+        <Link 
+          to="/settings" 
+          className={`nav-link ${isActive('/settings') ? 'active' : ''}`}
         >
           設定
-        </button>
+        </Link>
       </div>
     </nav>
   );
