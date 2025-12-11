@@ -158,6 +158,41 @@ body {
   align-items: center;
 }
 
+/* --- スキル一覧 --- */
+.skills-panel {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.skills-section {
+  flex: 1 1 420px;
+  background: white;
+  padding: 18px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.skills-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.skill-tag {
+  background: #eef7f1;
+  color: #1f6b3a;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.skill-tag.desired {
+  background: #f0f7ff;
+  color: #1b4f9c;
+}
+
 /* レスポンシブ */
 @media (max-width: 768px) {
   .dashboard-container {

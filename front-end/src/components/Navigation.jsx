@@ -16,6 +16,12 @@ function Navigation() {
         >
           ホーム
         </Link>
+        <Link
+          to="/dashboard"
+          className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}
+        >
+          ダッシュボード
+        </Link>
         <Link 
           to="/profile" 
           className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
