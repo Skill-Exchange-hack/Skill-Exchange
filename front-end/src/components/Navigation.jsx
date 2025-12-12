@@ -20,13 +20,19 @@ function Navigation() {
           to="/dashboard"
           className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}
         >
-          ダッシュボード
+          スキル一覧
         </Link>
         <Link 
           to="/profile" 
           className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
         >
           プロフィール
+        </Link>
+        <Link
+          to="/matches"
+          className={`nav-link ${isActive('/matches') ? 'active' : ''}`}
+        >
+          マッチング
         </Link>
         <Link 
           to="/settings" 

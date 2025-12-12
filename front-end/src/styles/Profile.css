@@ -59,6 +59,25 @@
   background-color: #45a049;
 }
 
+/* 保存 / キャンセル ボタン（黄緑・角丸で他UIと合わせる） */
+.save-btn,
+.cancel-btn {
+  background-color: #9ACD32; /* 黄緑 */
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.18s ease;
+}
+
+.save-btn:hover,
+.cancel-btn:hover {
+  background-color: #88b82a;
+}
+
 .profile-content {
   display: flex;
   flex-direction: column;
@@ -130,6 +149,18 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
+}
+
+/* 自己紹介編集用テキストエリア */
+.bio-input {
+  width: 100%;
+  min-height: 160px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: vertical;
 }
 
 .add-btn {
