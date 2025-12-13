@@ -201,6 +201,23 @@ a {
   min-height: 220px;
 }
 
+/* Fix: allow flex children to shrink so horizontal overflow behaves correctly
+   without creating unresponsive horizontal scroll areas. */
+.frame,
+.frame-body,
+.activity-box,
+.matches-list,
+.message-list,
+.calendar-grid {
+  min-width: 0;
+}
+
+/* Improve touch / smooth scrolling on overflow areas */
+.frame-body,
+.message-list {
+  -webkit-overflow-scrolling: touch;
+}
+
 /* マッチ一覧 */
 .matches-list {
   list-style: none;
@@ -212,17 +229,103 @@ a {
 }
 
 .match-item {
-  padding: 10px;
-  border-radius: 6px;
+  padding: 12px 14px;
+  border-radius: 12px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #fff;
+  border: 1px solid #e8f3ea;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+  transition: transform 0.14s, box-shadow 0.14s;
 }
 
 .match-item.selected {
-  background: #eef7ff;
-  border: 1px solid #d0e8ff;
+  background: #f0fff7;
+  border-color: #cdefd6;
+}
+
+.match-info {
+  font-weight: 700;
+  color: #162a1f;
+}
+
+.match-sub {
+  font-size: 13px;
+  color: #546166;
+  margin-top: 6px;
+}
+
+.matches-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 900px) {
+  .matches-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.connect-btn {
+  background: #9ae6b4; /* 黄緑 */
+  color: #07311b;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(10, 60, 25, 0.06);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.connect-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(10, 60, 25, 0.12);
+}
+
+/* Ensure buttons have a large clickable area (not only text) */
+.connect-btn,
+.remove-btn,
+.profile-btn,
+.message-input button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+/* Make right-side button area within match/teacher rows fully clickable */
+.match-item > div:last-child,
+.teacher-item > div:last-child {
+  display: flex;
+  align-items: center;
+}
+
+.match-item .connect-btn,
+.teacher-item .connect-btn {
+  min-width: 72px;
+  height: 40px;
+  border-radius: 10px;
+  padding: 0 14px;
+}
+
+.remove-btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #e6e9ee;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* Make entire event-item remove button area easier to tap on mobile */
+.event-item .remove-btn {
+  min-width: 56px;
 }
 
 .match-date {
@@ -314,6 +417,138 @@ a {
   padding: 18px;
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.skill-search-input {
+  flex: 1 1 auto;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6eef0;
+  background: #fff;
+}
+
+.teacher-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Calendar styles */
+.calendar {
+  width: 100%;
+}
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.calendar-title {
+  font-weight: 700;
+  color: #162a1f;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.calendar-weekday {
+  text-align: center;
+  font-size: 13px;
+  color: #53606a;
+}
+.calendar-day {
+  min-height: 84px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid #eef2f1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.calendar-day.other-month {
+  opacity: 0.5;
+}
+.day-number {
+  font-weight: 700;
+  color: #22332a;
+}
+.event-badge {
+  margin-top: 6px;
+  background: #9ae6b4;
+  color: #07311b;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  align-self: flex-start;
+}
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.event-item {
+  background: #fff;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #eef3ee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.date-search-input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e6eef0;
+}
+
+/* Auth page styles */
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+.auth-card {
+  width: 420px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(16,24,40,0.06);
+}
+.auth-card h2 {
+  margin-bottom: 12px;
+}
+.auth-card form label {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.auth-card form input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6eef0;
+}
+.form-error {
+  color: #c53030;
+  margin-top: 8px;
+}
+
+/* make the "create account" link more visible on the auth card */
+.auth-create-link {
+  color: #ff9800; /* orange for strong contrast */
+  font-weight: 700;
+  text-decoration: underline;
+}
+.auth-create-link:hover {
+  color: #ff7a18;
+  text-decoration: none;
 }
 
 .skills-grid {
