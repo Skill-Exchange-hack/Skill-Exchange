@@ -8,8 +8,10 @@ function DashboardPage() {
       <aside className="sidebar">
         <div className="brand">スキル交換</div>
         <ul className="sidebar-menu">
-          <li className="active"><Link to="/dashboard">🏠 スキル一覧</Link></li>
+          <li><Link to="/">🏠 ホーム</Link></li>
           <li><Link to="/matches">🤝 マッチング</Link></li>
+          <li className="active"><Link to="/dashboard">📚 スキル一覧</Link></li>
+          <li><Link to="/profile">👤 プロフィール</Link></li>
           <li><Link to="/settings">⚙ 設定</Link></li>
         </ul>
       </aside>

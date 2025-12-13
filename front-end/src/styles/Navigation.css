@@ -41,6 +41,21 @@
   color: white;
 }
 
+/* distinct style for login button (placed left of Settings) */
+.nav-link--login {
+  background: #ffb74d; /* amber/orange */
+  color: #1f2937;
+  font-weight: 700;
+}
+.nav-link--login:hover {
+  background: #ffb04a;
+  color: #0f1720;
+}
+.nav-link--login.active {
+  background: #ff9800;
+  color: white;
+}
+
 @media (max-width: 768px) {
   .navigation {
     flex-direction: column;
