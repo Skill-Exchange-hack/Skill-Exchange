@@ -2,10 +2,25 @@ import { useEffect, useState } from 'react';
 import '../styles/Profile.css';
 
 function Profile() {
-  const [name] = useState('ユーザー名');
+  const [name, setName] = useState(() => {
+    try {
+      const v = localStorage.getItem('profileName');
+      return v || 'ユーザー名';
+    } catch {
+      return 'ユーザー名';
+    }
+  });
   const [email] = useState('user@example.com');
-  const [bio] = useState('フルスタック開発者です。Reactとその周辺技術に興味があります。');
+  const [bio, setBio] = useState(() => {
+    try {
+      const v = localStorage.getItem('profileBio');
+      return v || 'フルスタック開発者です。Reactとその周辺技術に興味があります。';
+    } catch {
+      return 'フルスタック開発者です。Reactとその周辺技術に興味があります。';
+    }
+  });
   const [avatar] = useState('👤');
+  const [editing, setEditing] = useState(false);
 
   const [skills, setSkills] = useState(() => {
     try {
@@ -35,6 +50,12 @@ function Profile() {
   useEffect(() => {
     localStorage.setItem('desiredSkills', JSON.stringify(desired));
   }, [desired]);
+
+  useEffect(() => {
+    // persist profile fields when not editing (or on save flow)
+    localStorage.setItem('profileName', name);
+    localStorage.setItem('profileBio', bio);
+  }, [name, bio]);
 
   const addSkill = () => {
     const v = skillInput.trim();
@@ -71,35 +92,80 @@ function Profile() {
       <div className="profile-header">
         <div className="profile-avatar">{avatar}</div>
         <div className="profile-info">
-          <h1>{name}</h1>
+          {editing ? (
+            <input className="profile-name-input" value={name} onChange={(e) => setName(e.target.value)} />
+          ) : (
+            <h1>{name}</h1>
+          )}
           <p className="profile-email">{email}</p>
         </div>
-        <button className="edit-btn">編集</button>
+        {editing ? (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              className="save-btn"
+              onClick={() => {
+                // save already persisted via effects; just exit edit mode
+                setEditing(false);
+              }}
+            >保存</button>
+            <button
+              className="cancel-btn"
+              onClick={() => {
+                // reload values from storage to cancel changes
+                try {
+                  const n = localStorage.getItem('profileName');
+                  if (n) setName(n);
+                } catch {}
+                try {
+                  const b = localStorage.getItem('profileBio');
+                  if (b) setBio(b);
+                } catch {}
+                try {
+                  const s = localStorage.getItem('skills');
+                  setSkills(s ? JSON.parse(s) : []);
+                } catch {}
+                try {
+                  const d = localStorage.getItem('desiredSkills');
+                  setDesired(d ? JSON.parse(d) : []);
+                } catch {}
+                setEditing(false);
+              }}
+            >キャンセル</button>
+          </div>
+        ) : (
+          <button className="edit-btn" onClick={() => setEditing(true)}>編集</button>
+        )}
       </div>
 
       <div className="profile-content">
         <section className="profile-section">
           <h2>自己紹介</h2>
-          <p>{bio}</p>
+          {editing ? (
+            <textarea className="bio-input" value={bio} onChange={(e) => setBio(e.target.value)} />
+          ) : (
+            <p>{bio}</p>
+          )}
         </section>
 
         <section className="profile-section">
           <h2>自分のスキル（教えられる）</h2>
-          <div className="skill-actions">
-            <input
-              className="skill-input"
-              placeholder="例: Python"
-              value={skillInput}
-              onChange={(e) => setSkillInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addSkill()}
-            />
-            <button className="add-btn" onClick={addSkill}>追加</button>
-          </div>
+          {editing && (
+            <div className="skill-actions">
+              <input
+                className="skill-input"
+                placeholder="例: Python"
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addSkill()}
+              />
+              <button className="add-btn" onClick={addSkill}>追加</button>
+            </div>
+          )}
           <div className="skills-list">
             {skills.map((skill, index) => (
               <div key={index} className="skill-item">
                 <span className="skill-tag">{skill}</span>
-                <button className="remove-btn" onClick={() => removeSkill(index)}>削除</button>
+                {editing && <button className="remove-btn" onClick={() => removeSkill(index)}>削除</button>}
               </div>
             ))}
           </div>
@@ -107,21 +173,23 @@ function Profile() {
 
         <section className="profile-section">
           <h2>習得したいスキル（教わりたい）</h2>
-          <div className="skill-actions">
-            <input
-              className="skill-input"
-              placeholder="例: Docker"
-              value={desiredInput}
-              onChange={(e) => setDesiredInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addDesired()}
-            />
-            <button className="add-btn" onClick={addDesired}>追加</button>
-          </div>
+          {editing && (
+            <div className="skill-actions">
+              <input
+                className="skill-input"
+                placeholder="例: Docker"
+                value={desiredInput}
+                onChange={(e) => setDesiredInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addDesired()}
+              />
+              <button className="add-btn" onClick={addDesired}>追加</button>
+            </div>
+          )}
           <div className="skills-list">
             {desired.map((d, index) => (
               <div key={index} className="skill-item">
                 <span className="skill-tag desired">{d}</span>
-                <button className="remove-btn" onClick={() => removeDesired(index)}>削除</button>
+                {editing && <button className="remove-btn" onClick={() => removeDesired(index)}>削除</button>}
               </div>
             ))}
           </div>

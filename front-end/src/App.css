@@ -10,6 +10,12 @@ body {
   background-color: #f5f5f5;
 }
 
+/* リンクのデフォルト青色・下線を消す */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .dashboard-container {
   display: flex;
   min-height: calc(100vh - 80px);
@@ -36,6 +42,11 @@ body {
   padding: 20px;
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
+  height: calc(100vh - 40px);
+  overflow: auto;
 }
 
 .brand {
@@ -158,6 +169,138 @@ body {
   align-items: center;
 }
 
+/* 並べて表示するレイアウト */
+.activity-box.two-column {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* フレーム */
+.frame {
+  background: #fff;
+  border: 1px solid #e6e9ee;
+  border-radius: 8px;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.frame-header {
+  padding: 12px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+  font-weight: 700;
+  color: #333;
+}
+
+.frame-body {
+  padding: 12px 16px;
+  overflow: auto;
+  min-height: 220px;
+}
+
+/* マッチ一覧 */
+.matches-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.match-item {
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.match-item.selected {
+  background: #eef7ff;
+  border: 1px solid #d0e8ff;
+}
+
+.match-date {
+  color: #888;
+  font-size: 12px;
+}
+
+.match-info {
+  font-weight: 600;
+  color: #222;
+}
+
+/* メッセージパネル */
+.message-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.message-header {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.message-list {
+  flex: 1 1 auto;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 8px;
+}
+
+.message {
+  max-width: 80%;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.message.sent {
+  align-self: flex-end;
+  background: #dcf8c6;
+}
+
+.message.received {
+  align-self: flex-start;
+  background: #f1f1f1;
+}
+
+.message-date {
+  font-size: 11px;
+  color: #666;
+  margin-top: 6px;
+}
+
+.message-input {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.message-input textarea {
+  flex: 1 1 auto;
+  min-height: 60px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.message-input button {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 /* --- スキル一覧 --- */
 .skills-panel {
   display: flex;
@@ -203,6 +346,9 @@ body {
     width: 100%;
     flex-direction: row;
     padding: 15px;
+    position: static;
+    height: auto;
+    overflow: visible;
   }
 
   .brand {
