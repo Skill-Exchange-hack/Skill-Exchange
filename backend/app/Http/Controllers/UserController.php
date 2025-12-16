@@ -17,11 +17,12 @@ class UserController extends Controller
     // 新しいユーザーを作成
     public function store(Request $request)
     {
-        // バリデーションなしで name のみを使う
-        $user = User::create([
-            'name' => $request->name,
+        // バリデーション
+        $validated = $request->validate([
+            'name' => 'required|string|unique:users,name',
         ]);
 
+        $user = User::create($validated);
         return response()->json($user, 201);
     }
 

@@ -15,10 +15,17 @@ class UserMatchController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'matched_user_id' => 'required|exists:users,id',
+            'user1_id' => 'required|exists:users,id',
+            'user2_id' => 'required|exists:users,id',
+            'skill_from_user1' => 'required|exists:skills,id',
+            'skill_from_user2' => 'required|exists:skills,id',
             'status' => 'nullable|string',
         ]);
+
+        // デフォルトstatus
+        if (!isset($validated['status'])) {
+            $validated['status'] = 'pending';
+        }
 
         $userMatch = UserMatch::create($validated);
         return response()->json($userMatch, 201);

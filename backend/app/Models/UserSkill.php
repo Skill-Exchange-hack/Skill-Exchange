@@ -9,7 +9,9 @@ class UserSkill extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
+    public $timestamps = true;
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = null;
 
     protected $fillable = ['user_id', 'skill_id', 'level', 'description'];
 

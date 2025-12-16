@@ -7,8 +7,13 @@ use Illuminate\Http\Request;
 
 class UserSkillController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $userId = $request->query('user_id');
+        if ($userId) {
+            $userSkills = UserSkill::where('user_id', $userId)->with('skill')->get();
+            return response()->json($userSkills);
+        }
         return response()->json(UserSkill::all());
     }
 

@@ -10,7 +10,9 @@ class User extends Model
 {
     use HasFactory;
 
-    public $timestamps = false; // created_at しかないので timestamps 無効
+    public $timestamps = true;
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = null; // updated_at がないので null に設定
 
     protected $fillable = ['name'];
 

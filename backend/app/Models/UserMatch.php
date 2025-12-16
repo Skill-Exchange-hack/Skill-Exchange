@@ -10,7 +10,9 @@ class UserMatch extends Model
     use HasFactory;
     protected $table = 'matches';
 
-    public $timestamps = false;
+    public $timestamps = true;
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = null;
 
     protected $fillable = [
         'user1_id', 'user2_id', 'skill_from_user1', 'skill_from_user2', 'status'
