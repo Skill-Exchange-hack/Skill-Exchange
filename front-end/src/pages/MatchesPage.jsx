@@ -9,6 +9,7 @@ function MatchesPage() {
   const [allUsers, setAllUsers] = useState([]);
   const [currentUserSkills, setCurrentUserSkills] = useState([]);
   const [matches, setMatches] = useState([]);
+  const [userSkillsMap, setUserSkillsMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -31,7 +32,35 @@ function MatchesPage() {
           throw new Error(`ユーザー取得エラー: ${usersRes.status}`);
         }
         const usersData = await usersRes.json();
-        setAllUsers(usersData.filter((u) => u.id !== currentUser.id));
+        const otherUsers = usersData.filter((u) => u.id !== currentUser.id);
+        setAllUsers(otherUsers);
+
+        // すべてのスキルを取得
+        const allSkillsRes = await fetch('http://localhost:8000/api/skills');
+        if (!allSkillsRes.ok) {
+          throw new Error(`スキル一覧取得エラー: ${allSkillsRes.status}`);
+        }
+        const allSkillsData = await allSkillsRes.json();
+        const skillMap = {};
+        allSkillsData.forEach((skill) => {
+          skillMap[skill.id] = skill;
+        });
+
+        // 各ユーザーのスキルを取得
+        const userSkillsMapTemp = {};
+        for (const user of otherUsers) {
+          const skillRes = await fetch(
+            `http://localhost:8000/api/user-skills?user_id=${user.id}`
+          );
+          if (skillRes.ok) {
+            const skillData = await skillRes.json();
+            userSkillsMapTemp[user.id] = skillData.map((us) => ({
+              ...us,
+              skill: skillMap[us.skill_id] || { name: '不明', category: '' },
+            }));
+          }
+        }
+        setUserSkillsMap(userSkillsMapTemp);
 
         // 現在のユーザーのスキル取得
         const skillsRes = await fetch(
@@ -142,8 +171,8 @@ function MatchesPage() {
                   key={user.id}
                   className="p-6 rounded-xl border-2 border-slate-200 bg-white hover:shadow-lg hover:border-emerald-300 transition-all duration-300 animate-fade-in"
                 >
-                  <div className="flex justify-between items-center">
-                    <div>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
                       <div className="font-bold text-slate-800 text-lg">
                         👤 {user.name}
                       </div>
@@ -151,9 +180,28 @@ function MatchesPage() {
                         📅 登録日:{' '}
                         {new Date(user.created_at).toLocaleDateString('ja-JP')}
                       </div>
+                      {userSkillsMap[user.id] &&
+                        userSkillsMap[user.id].length > 0 && (
+                          <div className="mt-3">
+                            <div className="text-sm font-semibold text-slate-700 mb-2">
+                              💡 保有スキル:
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {userSkillsMap[user.id].map((userSkill) => (
+                                <span
+                                  key={userSkill.id}
+                                  className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-medium"
+                                >
+                                  {userSkill.skill?.name || 'スキル'} (Lv.
+                                  {userSkill.level})
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                     </div>
                     <button
-                      className="bg-gradient-primary hover:shadow-lg text-white font-bold py-2 px-6 rounded-lg transition-all transform hover:scale-105 shadow-md"
+                      className="bg-gradient-primary hover:shadow-lg text-white font-bold py-2 px-6 rounded-lg transition-all transform hover:scale-105 shadow-md ml-4 whitespace-nowrap"
                       onClick={() => connect(user)}
                     >
                       🔗 接続

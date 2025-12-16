@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
 import MatchesPage from './pages/MatchesPage';
 import RegisterPage from './pages/RegisterPage';
+import LoginPage from './pages/LoginPage';
 import MessagePage from './pages/MessagePage';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/messages/:id" element={<MessagePage />} />
         <Route path="/profile" element={<ProfilePage />} />

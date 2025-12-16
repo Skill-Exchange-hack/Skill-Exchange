@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -24,6 +25,37 @@ class UserController extends Controller
 
         $user = User::create($validated);
         return response()->json($user, 201);
+    }
+
+    // ユーザーをログイン（name で検索）
+    public function login(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string',
+            ]);
+
+            Log::info('Login attempt:', $validated);
+
+            $user = User::where('name', $validated['name'])->first();
+
+            if (!$user) {
+                Log::warning('User not found:', $validated);
+                return response()->json([
+                    'error' => 'ユーザーが見つかりません',
+                    'name' => $validated['name'],
+                ], 404);
+            }
+
+            Log::info('User found:', $user->toArray());
+            return response()->json($user, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Login validation failed:', $e->errors());
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Login error:', ['message' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     // 特定のユーザーを取得
