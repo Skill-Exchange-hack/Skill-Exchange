@@ -1,8 +1,97 @@
+import { useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+
 function SettingsPage() {
+  const navigate = useNavigate();
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+  // ユーザーが登録されていない場合はリダイレクト
+  useEffect(() => {
+    if (!currentUser || !currentUser.id) {
+      navigate('/register');
+    }
+  }, [currentUser, navigate]);
+
+  if (!currentUser || !currentUser.id) {
+    return <div className="p-5">リダイレクト中...</div>;
+  }
+
   return (
-    <div className="page-content">
-      <h1>設定</h1>
-      <p>設定ページの内容はここに表示されます。</p>
+    <div className="flex min-h-screen bg-gray-100">
+      <aside className="w-60 bg-gray-800 text-white p-5 sticky top-5 self-start max-h-screen overflow-auto rounded-lg">
+        <div className="text-2xl font-bold mb-8 text-green-500">スキル交換</div>
+        <ul className="flex flex-col gap-2">
+          <li>
+            <Link
+              to="/"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              🏠 ホーム
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/matches"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              🤝 マッチング
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/dashboard"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              📚 スキル一覧
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/profile"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              👤 プロフィール
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/settings"
+              className="block px-3 py-3 rounded-lg bg-green-500 text-white font-semibold"
+            >
+              ⚙ 設定
+            </Link>
+          </li>
+        </ul>
+      </aside>
+
+      <main className="flex-1 flex flex-col">
+        <header className="bg-white p-8 shadow-md flex justify-between items-center">
+          <h1 className="text-4xl font-bold text-gray-800">設定</h1>
+        </header>
+
+        <section className="p-8">
+          <div className="bg-white p-8 rounded-lg shadow">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              アカウント設定
+            </h2>
+            <p className="text-gray-700 mb-2">
+              <strong>ユーザーID:</strong> {currentUser.id}
+            </p>
+            <p className="text-gray-700 mb-6">
+              <strong>ユーザー名:</strong> {currentUser.name}
+            </p>
+            <button
+              onClick={() => {
+                localStorage.removeItem('currentUser');
+                navigate('/register');
+              }}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+            >
+              ログアウト
+            </button>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

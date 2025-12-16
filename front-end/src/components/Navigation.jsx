@@ -1,10 +1,8 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import '../styles/Navigation.css';
 
 function Navigation() {
   const location = useLocation();
-  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('currentUser'));
@@ -13,7 +11,7 @@ function Navigation() {
     }
   });
 
-  // update user state when route changes (login redirects will update nav)
+  // update user state when route changes
   useEffect(() => {
     try {
       setCurrentUser(JSON.parse(localStorage.getItem('currentUser')));
@@ -24,52 +22,62 @@ function Navigation() {
 
   const isActive = (path) => location.pathname === path;
 
-  const logout = () => {
-    try { localStorage.removeItem('currentUser'); } catch {}
-    setCurrentUser(null);
-    navigate('/login');
-  };
-
   return (
-    <nav className="navigation">
-      <div className="nav-brand">スキル交換</div>
-      <div className="nav-links">
-        <Link 
-          to="/" 
-          className={`nav-link ${isActive('/') ? 'active' : ''}`}
+    <nav className="flex justify-between items-center bg-gray-900 px-8 py-4 shadow-lg mb-5">
+      <div className="text-2xl font-bold text-green-500">スキル交換</div>
+      <div className="flex gap-5">
+        <Link
+          to="/"
+          className={`px-4 py-2 rounded-md transition-all ${
+            isActive('/')
+              ? 'bg-green-500 text-white'
+              : 'text-white hover:bg-green-500/20'
+          }`}
         >
           ホーム
         </Link>
         <Link
           to="/matches"
-          className={`nav-link ${isActive('/matches') ? 'active' : ''}`}
+          className={`px-4 py-2 rounded-md transition-all ${
+            isActive('/matches')
+              ? 'bg-green-500 text-white'
+              : 'text-white hover:bg-green-500/20'
+          }`}
         >
           マッチング
         </Link>
         <Link
           to="/dashboard"
-          className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}
+          className={`px-4 py-2 rounded-md transition-all ${
+            isActive('/dashboard')
+              ? 'bg-green-500 text-white'
+              : 'text-white hover:bg-green-500/20'
+          }`}
         >
           スキル一覧
         </Link>
-        <Link 
-          to="/profile" 
-          className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
+        <Link
+          to="/profile"
+          className={`px-4 py-2 rounded-md transition-all ${
+            isActive('/profile')
+              ? 'bg-green-500 text-white'
+              : 'text-white hover:bg-green-500/20'
+          }`}
         >
           プロフィール
         </Link>
-        <Link 
-          to="/settings" 
-          className={`nav-link ${isActive('/settings') ? 'active' : ''}`}
+        <Link
+          to="/settings"
+          className={`px-4 py-2 rounded-md transition-all ${
+            isActive('/settings')
+              ? 'bg-green-500 text-white'
+              : 'text-white hover:bg-green-500/20'
+          }`}
         >
           設定
         </Link>
-        {currentUser ? (
-          <button onClick={logout} className={`nav-link nav-link--logout`}>ログアウト</button>
-        ) : (
-          <Link to="/login" className={`nav-link nav-link--login ${isActive('/login') ? 'active' : ''}`}>
-            ログイン
-          </Link>
+        {currentUser && (
+          <span className="px-4 py-2 text-white">👤 {currentUser.name}</span>
         )}
       </div>
     </nav>

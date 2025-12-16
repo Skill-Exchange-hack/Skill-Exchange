@@ -1,152 +1,202 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
-import '../App.css';
+import { useEffect, useState } from 'react';
 
 function MatchesPage() {
-  const [matches, setMatches] = useState(() => {
-    try {
-      const raw = localStorage.getItem('matches');
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  // current user's skills and desired skills (from Profile)
-  const currentSkills = useMemo(() => {
-    try {
-      const raw = localStorage.getItem('skills');
-      return raw ? JSON.parse(raw) : ['React', 'JavaScript', 'CSS'];
-    } catch {
-      return ['React', 'JavaScript', 'CSS'];
-    }
-  }, []);
-
-  const currentDesired = useMemo(() => {
-    try {
-      const raw = localStorage.getItem('desiredSkills');
-      return raw ? JSON.parse(raw) : ['TypeScript', 'GraphQL'];
-    } catch {
-      return ['TypeScript', 'GraphQL'];
-    }
-  }, []);
-
-  // load other users (sample or from localStorage)
-  const users = useMemo(() => {
-    try {
-      const raw = localStorage.getItem('users');
-      if (raw) return JSON.parse(raw);
-    } catch {}
-
-    // sample users
-    return [
-      { id: 2, name: '山田 太郎', skills: ['React', 'Node.js'], desired: ['TypeScript'] },
-      { id: 3, name: '佐藤 花子', skills: ['Python', 'Django'], desired: ['React', 'JavaScript'] },
-      { id: 4, name: '鈴木 次郎', skills: ['TypeScript', 'GraphQL'], desired: ['Go'] },
-      { id: 5, name: '高橋 愛', skills: ['CSS', 'Design'], desired: ['React'] }
-    ];
-  }, []);
-
-  // compute mutual matches: user wants X and other can teach X, and other wants Y and current can teach Y
-  const potentialMatches = useMemo(() => {
-    const res = [];
-    users.forEach((u) => {
-      const teaches = u.skills.filter((s) => currentDesired.includes(s));
-      const wants = u.desired.filter((s) => currentSkills.includes(s));
-      if (teaches.length > 0 || wants.length > 0) {
-        res.push({
-          ...u,
-          matchSkills: teaches,
-          reciprocal: wants,
-          score: teaches.length + wants.length
-        });
-      }
-    });
-    // sort by score desc
-    return res.sort((a, b) => b.score - a.score);
-  }, [users, currentDesired, currentSkills]);
-
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
   const navigate = useNavigate();
 
-  const [skillQuery, setSkillQuery] = useState('');
+  const [allUsers, setAllUsers] = useState([]);
+  const [currentUserSkills, setCurrentUserSkills] = useState([]);
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const searchResults = useMemo(() => {
-    const q = skillQuery.trim().toLowerCase();
-    if (!q) return [];
-    return users
-      .map((u) => {
-        const matched = u.skills.find((s) => s.toLowerCase().includes(q));
-        if (matched) return { ...u, matchedSkill: matched, matchSkills: [matched] };
-        return null;
-      })
-      .filter(Boolean);
-  }, [users, skillQuery]);
+  // ユーザーが登録されていない場合はリダイレクト
+  useEffect(() => {
+    if (!currentUser || !currentUser.id) {
+      navigate('/register');
+    }
+  }, [currentUser, navigate]);
 
   useEffect(() => {
-    localStorage.setItem('matches', JSON.stringify(matches));
-  }, [matches]);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // すべてのユーザーを取得
+        const usersRes = await fetch('http://localhost:8000/api/users');
+        if (!usersRes.ok) {
+          throw new Error(`ユーザー取得エラー: ${usersRes.status}`);
+        }
+        const usersData = await usersRes.json();
+        setAllUsers(usersData.filter((u) => u.id !== currentUser.id));
+
+        // 現在のユーザーのスキル取得
+        const skillsRes = await fetch(
+          `http://localhost:8000/api/user-skills?user_id=${currentUser.id}`
+        );
+        if (!skillsRes.ok) {
+          throw new Error(`スキル取得エラー: ${skillsRes.status}`);
+        }
+        const skillsData = await skillsRes.json();
+        setCurrentUserSkills(skillsData);
+
+        // 現在のユーザーの欲しいスキル取得
+        const desiredRes = await fetch(
+          `http://localhost:8000/api/desired-skills?user_id=${currentUser.id}`
+        );
+        if (!desiredRes.ok) {
+          throw new Error(`欲しいスキル取得エラー: ${desiredRes.status}`);
+        }
+
+        // マッチング情報取得
+        const matchesRes = await fetch(
+          'http://localhost:8000/api/user-matches'
+        );
+        if (!matchesRes.ok) {
+          throw new Error(`マッチング取得エラー: ${matchesRes.status}`);
+        }
+        const matchesData = await matchesRes.json();
+        setMatches(matchesData);
+      } catch (err) {
+        setError('データの取得に失敗しました: ' + err.message);
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentUser && currentUser.id) {
+      fetchData();
+    }
+  }, [currentUser.id]);
 
   const connect = async (user) => {
-    const date = new Date().toISOString().slice(0, 10);
-    const skill = user.matchSkills[0] || user.reciprocal[0] || '';
-    const entry = {
-      id: Date.now(),
-      partner: user.name,
-      skill,
-      date
-    };
-    setMatches((m) => [entry, ...m]);
-
-    // navigate to message page after creating match
     try {
-      navigate(`/messages/${user.id}`, { state: { partnerName: user.name } });
-    } catch (e) {}
+      // 最初のスキルを取得（ない場合は1を使用）
+      const skillFromUser1 =
+        currentUserSkills.length > 0 ? currentUserSkills[0].skill_id : 1;
+      const skillFromUser2 = 1;
 
-    // Try to POST to backend; fail silently if not available
-    try {
-      await fetch('/api/user-matches', {
+      const response = await fetch('http://localhost:8000/api/user-matches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: 1, matched_user_id: user.id, status: 'pending' })
+        body: JSON.stringify({
+          user1_id: currentUser.id,
+          user2_id: user.id,
+          skill_from_user1: skillFromUser1,
+          skill_from_user2: skillFromUser2,
+          status: 'pending',
+        }),
       });
-    } catch (e) {
-      // ignore
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      alert(`✓ ${user.name}さんとマッチしました！`);
+    } catch (err) {
+      alert('マッチング作成エラー: ' + err.message);
+      console.error(err);
     }
   };
 
+  if (!currentUser || !currentUser.id) {
+    return <div className="p-5">リダイレクト中...</div>;
+  }
+
+  if (loading) return <div className="p-5">読み込み中...</div>;
+
   return (
-    <div className="dashboard-container">
-      <aside className="sidebar">
-        <div className="brand">スキル交換</div>
-        <ul className="sidebar-menu">
-          <li><Link to="/">🏠 ホーム</Link></li>
-          <li className="active"><Link to="/matches">🤝 マッチング</Link></li>
-          <li><Link to="/dashboard">📚 スキル一覧</Link></li>
-          <li><Link to="/profile">👤 プロフィール</Link></li>
-          <li><Link to="/settings">⚙ 設定</Link></li>
+    <div className="flex min-h-screen bg-gray-100">
+      <aside className="w-60 bg-gray-800 text-white p-5 sticky top-5 self-start max-h-screen overflow-auto rounded-lg">
+        <div className="text-2xl font-bold mb-8 text-green-500">スキル交換</div>
+        <ul className="flex flex-col gap-2">
+          <li>
+            <Link
+              to="/"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              🏠 ホーム
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/matches"
+              className="block px-3 py-3 rounded-lg bg-green-500 text-white font-semibold"
+            >
+              🤝 マッチング
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/dashboard"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              📚 スキル一覧
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/profile"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              👤 プロフィール
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/settings"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              ⚙ 設定
+            </Link>
+          </li>
         </ul>
       </aside>
 
-      <main className="main-content">
-        <header className="header">
-          <h1>マッチング</h1>
+      <main className="flex-1 flex flex-col">
+        <header className="bg-white p-8 shadow-md flex justify-between items-center">
+          <h1 className="text-4xl font-bold text-gray-800">マッチング</h1>
         </header>
 
-        <section className="page-content">
-          <h2>おすすめのマッチ</h2>
-          <div className="activity-box">
-            {potentialMatches.length === 0 && <p>現在、表示するマッチがありません。</p>}
-            <ul className="matches-list">
-              {potentialMatches.map((m) => (
-                <li key={m.id} className="match-item">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {error && (
+          <div className="text-red-600 text-sm p-5 bg-red-50 m-5 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <section className="p-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            ユーザー一覧
+          </h2>
+          <div className="bg-white p-8 rounded-lg shadow-md">
+            {allUsers.length === 0 && (
+              <p className="text-gray-600">他のユーザーがいません。</p>
+            )}
+            <ul className="flex flex-col gap-3">
+              {allUsers.map((user) => (
+                <li
+                  key={user.id}
+                  className="p-4 rounded-lg border border-green-100 bg-white hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex justify-between items-center">
                     <div>
-                      <div className="match-info"><strong>{m.name}</strong></div>
-                      <div className="match-sub">教えられる: {m.matchSkills.join(', ') || '—'}</div>
-                      <div className="match-sub">教わりたい: {m.reciprocal.join(', ') || '—'}</div>
+                      <div className="font-semibold text-gray-800 text-base">
+                        <strong>{user.name}</strong>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        登録日:{' '}
+                        {new Date(user.created_at).toLocaleDateString('ja-JP')}
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button className="connect-btn" onClick={() => connect(m)}>接続</button>
+                    <div className="flex gap-2">
+                      <button
+                        className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                        onClick={() => connect(user)}
+                      >
+                        接続
+                      </button>
                     </div>
                   </div>
                 </li>
@@ -154,49 +204,25 @@ function MatchesPage() {
             </ul>
           </div>
 
-          {/* 検索：教わりたいスキルで講師を検索 */}
-          <div style={{ marginTop: 20 }} className="skill-search">
-            <label style={{ display: 'block', marginBottom: 8, color: '#333', fontWeight: 700 }}>講師を検索（教わりたいスキル）</label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                value={skillQuery}
-                onChange={(e) => setSkillQuery(e.target.value)}
-                placeholder="例: React, TypeScript"
-                className="skill-search-input"
-                onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
-              />
-              <button className="connect-btn" onClick={() => { /* no-op, results update live */ }}>検索</button>
-            </div>
-
-            {skillQuery.trim() !== '' && (
-              <div style={{ marginTop: 12 }}>
-                <div style={{ marginBottom: 8, color: '#444', fontWeight: 700 }}>検索結果</div>
-                <ul className="matches-list">
-                  {searchResults.length === 0 && <p style={{ color: '#666' }}>該当する講師が見つかりません。</p>}
-                  {searchResults.map((t) => (
-                    <li key={t.id} className="teacher-item match-item">
-                      <div>
-                        <div className="match-info"><strong>{t.name}</strong></div>
-                        <div className="match-sub">教えられる: {t.matchedSkill}</div>
-                      </div>
-                      <div>
-                        <button className="connect-btn" onClick={() => connect(t)}>接続</button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          <h2 style={{ marginTop: 24 }}>直近のマッチング</h2>
-          <div className="activity-box">
-            <ul className="matches-list">
-              {matches.length === 0 && <p>まだマッチングはありません。</p>}
+          <h2 className="text-2xl font-bold text-gray-800 mt-8 mb-4">
+            マッチング履歴
+          </h2>
+          <div className="bg-white p-8 rounded-lg shadow-md">
+            <ul className="flex flex-col gap-3">
+              {matches.length === 0 && (
+                <p className="text-gray-600">まだマッチングはありません。</p>
+              )}
               {matches.map((m) => (
-                <li key={m.id} className="match-item">
-                  <div className="match-date">{m.date}</div>
-                  <div className="match-info">{m.partner} — {m.skill}</div>
+                <li
+                  key={m.id}
+                  className="p-4 rounded-lg border border-green-100 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="text-sm text-gray-600">
+                    {new Date(m.created_at).toLocaleDateString('ja-JP')}
+                  </div>
+                  <div className="font-semibold text-gray-800">
+                    ステータス: {m.status}
+                  </div>
                 </li>
               ))}
             </ul>

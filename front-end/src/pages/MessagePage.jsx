@@ -1,79 +1,82 @@
-import { useEffect, useState, useRef } from 'react';
-import { useParams, useLocation, Link } from 'react-router-dom';
-import '../App.css';
+import { useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
 function MessagePage() {
-  const { id } = useParams();
-  const location = useLocation();
-  const partnerName = location.state?.partnerName || `ユーザー ${id}`;
-  const storageKey = `messages_${id}`;
-  const [messages, setMessages] = useState(() => {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [input, setInput] = useState('');
-  const listRef = useRef(null);
+  const navigate = useNavigate();
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
+  // ユーザーが登録されていない場合はリダイレクト
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(messages));
-  }, [messages, storageKey]);
-
-  useEffect(() => {
-    // scroll to bottom
-    if (listRef.current) {
-      listRef.current.scrollTop = listRef.current.scrollHeight;
+    if (!currentUser || !currentUser.id) {
+      navigate('/register');
     }
-  }, [messages]);
+  }, [currentUser, navigate]);
 
-  const send = () => {
-    const txt = input.trim();
-    if (!txt) return;
-    const entry = { id: Date.now(), text: txt, date: new Date().toISOString(), sender: 'me' };
-    setMessages((m) => [...m, entry]);
-    setInput('');
-  };
+  if (!currentUser || !currentUser.id) {
+    return <div className="p-5">リダイレクト中...</div>;
+  }
 
   return (
-    <div className="dashboard-container">
-      <aside className="sidebar">
-        <div className="brand">スキル交換</div>
-        <ul className="sidebar-menu">
-          <li><Link to="/">🏠 ホーム</Link></li>
-          <li><Link to="/matches">🤝 マッチング</Link></li>
-          <li><Link to="/dashboard">📚 スキル一覧</Link></li>
-          <li><Link to="/profile">👤 プロフィール</Link></li>
-          <li><Link to="/settings">⚙ 設定</Link></li>
+    <div className="flex min-h-screen bg-gray-100">
+      <aside className="w-60 bg-gray-800 text-white p-5 sticky top-5 self-start max-h-screen overflow-auto rounded-lg">
+        <div className="text-2xl font-bold mb-8 text-green-500">スキル交換</div>
+        <ul className="flex flex-col gap-2">
+          <li>
+            <Link
+              to="/"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              🏠 ホーム
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/matches"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              🤝 マッチング
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/dashboard"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              📚 スキル一覧
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/profile"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              👤 プロフィール
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/settings"
+              className="block px-3 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors"
+            >
+              ⚙ 設定
+            </Link>
+          </li>
         </ul>
       </aside>
 
-      <main className="main-content">
-        <header className="header">
-          <h1>メッセージ — {partnerName}</h1>
+      <main className="flex-1 flex flex-col">
+        <header className="bg-white p-8 shadow-md flex justify-between items-center">
+          <h1 className="text-4xl font-bold text-gray-800">メッセージング</h1>
         </header>
 
-        <section className="page-content">
-          <div className="activity-box" style={{ display: 'flex', flexDirection: 'column', minHeight: 360 }}>
-            <div className="message-panel">
-              <div className="message-header">{partnerName}</div>
-              <div className="message-list" ref={listRef} style={{ padding: 12, flex: 1, overflow: 'auto' }}>
-                {messages.length === 0 && <p style={{ color: '#666' }}>まだメッセージがありません。こんにちはから始めましょう。</p>}
-                {messages.map((msg) => (
-                  <div key={msg.id} className={`message ${msg.sender === 'me' ? 'sent' : 'received'}`}>
-                    <div>{msg.text}</div>
-                    <div className="message-date">{new Date(msg.date).toLocaleString()}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="message-input">
-                <textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder={`メッセージを送る — ${partnerName}`} />
-                <button onClick={send} className="connect-btn">送信</button>
-              </div>
-            </div>
+        <section className="p-8">
+          <div className="bg-white p-8 rounded-lg shadow">
+            <p className="text-gray-600 text-base">
+              メッセージング機能は現在準備中です。
+            </p>
+            <p className="text-gray-400 text-sm">
+              今後のアップデートで実装予定です。
+            </p>
           </div>
         </section>
       </main>
