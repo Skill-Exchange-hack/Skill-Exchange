@@ -90,69 +90,71 @@ function Profile() {
   if (loading) return <div className="p-5">読み込み中...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-5 bg-gray-100 min-h-screen">
-      <div className="flex items-center gap-8 bg-white p-8 rounded-lg shadow mb-8">
-        <div className="text-8xl min-w-fit text-center">👤</div>
-        <div className="flex-1">
-          {editing ? (
-            <input
-              className="text-4xl font-bold border-2 border-green-500 rounded-lg px-4 py-2 w-full"
-              value={user.name}
-              onChange={(e) => setUser({ ...user, name: e.target.value })}
-            />
-          ) : (
-            <h1 className="text-4xl font-bold text-gray-800">{user.name}</h1>
-          )}
-          <p className="text-gray-600">ID: {user.id}</p>
-        </div>
-        {editing ? (
-          <div className="flex gap-2">
-            <button
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-              onClick={handleSaveProfile}
-            >
-              保存
-            </button>
-            <button
-              className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-              onClick={() => {
-                setEditing(false);
-                setUser(currentUser);
-              }}
-            >
-              キャンセル
-            </button>
+    <div className="max-w-5xl mx-auto p-8 bg-gradient-subtle min-h-screen">
+      <div className="bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-xl p-10 mb-8 animate-slide-up">
+        <div className="flex items-center gap-10">
+          <div className="text-8xl min-w-fit text-center">👤</div>
+          <div className="flex-1">
+            {editing ? (
+              <input
+                className="text-4xl font-bold border-2 border-emerald-500 rounded-lg px-4 py-2 w-full focus:outline-none focus:border-cyan-500"
+                value={user.name}
+                onChange={(e) => setUser({ ...user, name: e.target.value })}
+              />
+            ) : (
+              <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">{user.name}</h1>
+            )}
+            <p className="text-slate-600 text-lg">ユーザーID: <span className="font-semibold text-slate-800">{user.id}</span></p>
           </div>
-        ) : (
-          <button
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-            onClick={() => setEditing(true)}
-          >
-            編集
-          </button>
-        )}
+          {editing ? (
+            <div className="flex gap-3">
+              <button
+                className="bg-gradient-primary hover:shadow-lg text-white font-bold py-2 px-6 rounded-lg transition-all transform hover:scale-105"
+                onClick={handleSaveProfile}
+              >
+                ✓ 保存
+              </button>
+              <button
+                className="bg-slate-400 hover:bg-slate-500 text-white font-bold py-2 px-6 rounded-lg transition-all transform hover:scale-105"
+                onClick={() => {
+                  setEditing(false);
+                  setUser(currentUser);
+                }}
+              >
+                ✕ キャンセル
+              </button>
+            </div>
+          ) : (
+            <button
+              className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg"
+              onClick={() => setEditing(true)}
+            >
+              ✏ 編集
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-8">
         {error && (
-          <div className="text-red-600 text-sm p-4 bg-red-50 rounded-lg">
+          <div className="text-red-600 text-sm p-5 bg-red-50/95 rounded-xl border border-red-200 backdrop-blur">
             {error}
           </div>
         )}
 
-        <section className="bg-white p-8 rounded-lg shadow">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            自分のスキル（教えられる）
+        <section className="bg-white/95 backdrop-blur border border-slate-200 p-8 rounded-2xl shadow-lg">
+          <h2 className="text-3xl font-bold text-slate-800 mb-6">
+            🎓 自分のスキル（教えられる）
           </h2>
           <div className="flex flex-wrap gap-3">
             {skills.length === 0 ? (
-              <p className="text-gray-600">スキルが登録されていません。</p>
+              <p className="text-slate-500 text-lg">スキルが登録されていません。</p>
             ) : (
               skills.map((skill) => (
-                <div key={skill.id}>
-                  <span className="inline-block px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium border border-green-500">
-                    {skill.skill ? skill.skill.name : skill.name} (Lv:{' '}
-                    {skill.level || 'N/A'})
+                <div key={skill.id} className="animate-fade-in">
+                  <span className="inline-block px-5 py-2 bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-800 rounded-full text-sm font-bold border-2 border-emerald-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110">
+                    {skill.skill ? skill.skill.name : skill.name} 
+                    <span className="ml-2 text-emerald-600 font-bold">Lv{skill.level || '?'}</span>
                   </span>
                 </div>
               ))
@@ -160,18 +162,19 @@ function Profile() {
           </div>
         </section>
 
-        <section className="bg-white p-8 rounded-lg shadow">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            習得したいスキル（教わりたい）
+        <section className="bg-white/95 backdrop-blur border border-slate-200 p-8 rounded-2xl shadow-lg">
+          <h2 className="text-3xl font-bold text-slate-800 mb-6">
+            🚀 習得したいスキル（教わりたい）
           </h2>
           <div className="flex flex-wrap gap-3">
             {desired.length === 0 ? (
-              <p className="text-gray-600">習得したいスキルがありません。</p>
+              <p className="text-slate-500 text-lg">習得したいスキルがありません。</p>
             ) : (
               desired.map((d) => (
-                <div key={d.id}>
-                  <span className="inline-block px-4 py-2 bg-orange-100 text-orange-800 rounded-full text-sm font-medium border border-orange-400">
-                    {d.skill ? d.skill.name : d.name} (優先度: {d.priority})
+                <div key={d.id} className="animate-fade-in">
+                  <span className="inline-block px-5 py-2 bg-gradient-to-r from-cyan-100 to-cyan-50 text-cyan-800 rounded-full text-sm font-bold border-2 border-cyan-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110">
+                    {d.skill ? d.skill.name : d.name} 
+                    <span className="ml-2 text-cyan-600 font-bold">優先度{d.priority}</span>
                   </span>
                 </div>
               ))
@@ -179,9 +182,9 @@ function Profile() {
           </div>
         </section>
 
-        <section className="bg-white p-8 rounded-lg shadow">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">登録日</h2>
-          <p className="text-gray-700">
+        <section className="bg-white/95 backdrop-blur border border-slate-200 p-8 rounded-2xl shadow-lg">
+          <h2 className="text-3xl font-bold text-slate-800 mb-4">📅 登録日</h2>
+          <p className="text-slate-700 text-lg font-medium">
             {new Date(user.created_at).toLocaleDateString('ja-JP')}
           </p>
         </section>

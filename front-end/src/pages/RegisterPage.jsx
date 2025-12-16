@@ -50,30 +50,34 @@ function RegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-12 rounded-lg shadow-lg max-w-sm w-full">
-        <h2 className="text-3xl font-bold mb-8 text-gray-800">ユーザー追加</h2>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-subtle">
+      <div className="bg-white/95 backdrop-blur border border-slate-200 p-12 rounded-2xl shadow-2xl max-w-sm w-full animate-slide-up">
+        <h2 className="text-4xl font-bold mb-3 bg-gradient-primary bg-clip-text text-transparent text-center">
+          スキル交換
+        </h2>
+        <p className="text-slate-600 text-center mb-8 text-sm">新しいユーザーを登録して始めましょう</p>
+        
         <form onSubmit={submit}>
-          <label className="block text-gray-700 font-semibold mb-3">
+          <label className="block text-slate-700 font-bold mb-3 text-lg">
             ユーザー名
           </label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="ユーザー名を入力"
+            placeholder="あなたのユーザー名"
             disabled={loading}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 mb-6"
+            className="w-full px-5 py-3 border-2 border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent mb-6 transition-all"
           />
-          {error && <div className="text-red-600 text-sm mb-4">{error}</div>}
+          {error && <div className="text-red-600 text-sm mb-4 p-3 bg-red-50/95 rounded-lg border border-red-200 font-semibold">{error}</div>}
           {success && (
-            <div className="text-green-600 text-sm mb-4">{success}</div>
+            <div className="text-emerald-600 text-sm mb-4 p-3 bg-emerald-50/95 rounded-lg border border-emerald-200 font-semibold">{success}</div>
           )}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
+            className="w-full bg-gradient-primary hover:shadow-lg text-white font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
           >
-            {loading ? '追加中...' : 'ユーザーを追加'}
+            {loading ? '⏳ 追加中...' : '✨ ユーザーを追加'}
           </button>
         </form>
       </div>

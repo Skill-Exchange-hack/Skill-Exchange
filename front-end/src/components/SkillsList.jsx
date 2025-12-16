@@ -45,42 +45,44 @@ function SkillsList() {
     }
   }, [currentUser.id]);
 
-  if (loading) return <div className="p-5">読み込み中...</div>;
-  if (error) return <div className="text-red-600 p-5">{error}</div>;
+  if (loading) return <div className="p-5 text-slate-600">読み込み中...</div>;
+  if (error) return <div className="text-red-600 p-5 text-center font-semibold">{error}</div>;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">あなたのスキル</h3>
+    <div className="flex flex-col gap-6">
+      <div className="bg-white/95 backdrop-blur border border-slate-200 p-8 rounded-2xl shadow-lg">
+        <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+          🎓 あなたのスキル
+        </h3>
         <div className="flex flex-wrap gap-3">
           {skills.length === 0 && (
-            <p className="text-gray-600">スキルが登録されていません。</p>
+            <p className="text-slate-500">スキルが登録されていません。</p>
           )}
           {skills.map((s) => (
             <span
               key={s.id}
-              className="inline-block px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium border border-green-500"
+              className="inline-block px-4 py-2 bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-800 rounded-full text-sm font-bold border-2 border-emerald-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110 animate-fade-in"
             >
-              {s.skill ? s.skill.name : s.name} (Lv: {s.level || 'N/A'})
+              {s.skill ? s.skill.name : s.name} <span className="ml-2 text-emerald-600">Lv{s.level || '?'}</span>
             </span>
           ))}
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">
-          習得したいスキル
+      <div className="bg-white/95 backdrop-blur border border-slate-200 p-8 rounded-2xl shadow-lg">
+        <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+          🚀 習得したいスキル
         </h3>
         <div className="flex flex-wrap gap-3">
           {desired.length === 0 && (
-            <p className="text-gray-600">習得したいスキルがありません。</p>
+            <p className="text-slate-500">習得したいスキルがありません。</p>
           )}
           {desired.map((d) => (
             <span
               key={d.id}
-              className="inline-block px-4 py-2 bg-orange-100 text-orange-800 rounded-full text-sm font-medium border border-orange-400"
+              className="inline-block px-4 py-2 bg-gradient-to-r from-cyan-100 to-cyan-50 text-cyan-800 rounded-full text-sm font-bold border-2 border-cyan-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110 animate-fade-in"
             >
-              {d.skill ? d.skill.name : d.name} (優先度: {d.priority})
+              {d.skill ? d.skill.name : d.name} <span className="ml-2 text-cyan-600">優先度{d.priority}</span>
             </span>
           ))}
         </div>

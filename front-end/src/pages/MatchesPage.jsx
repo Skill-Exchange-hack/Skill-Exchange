@@ -108,78 +108,71 @@ function MatchesPage() {
   if (loading) return <div className="p-5">読み込み中...</div>;
 
   return (
-    <main className="flex-1 flex flex-col">
-      <header className="bg-white p-8 shadow-md flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-gray-800">マッチング</h1>
-      </header>
+    <div className="flex flex-col min-h-screen bg-gradient-subtle">
+      <main className="flex-1 flex flex-col">
+        <header className="bg-white/95 backdrop-blur p-8 shadow-lg border-b border-slate-200">
+          <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            🤝 マッチング
+          </h1>
+          <p className="text-slate-600 mt-2">他のユーザーとスキルを交換しましょう</p>
+        </header>
 
-      {error && (
-        <div className="text-red-600 text-sm p-5 bg-red-50 m-5 rounded-lg">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="text-red-600 text-sm p-5 bg-red-50/95 m-5 rounded-xl border border-red-200 backdrop-blur font-semibold">
+            {error}
+          </div>
+        )}
 
-      <section className="p-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">ユーザー一覧</h2>
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          {allUsers.length === 0 && (
-            <p className="text-gray-600">他のユーザーがいません。</p>
-          )}
-          <ul className="flex flex-col gap-3">
-            {allUsers.map((user) => (
-              <li
-                key={user.id}
-                className="p-4 rounded-lg border border-green-100 bg-white hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="font-semibold text-gray-800 text-base">
-                      <strong>{user.name}</strong>
+        <section className="p-8">
+          <h2 className="text-3xl font-bold text-slate-800 mb-6">✨ ユーザー一覧</h2>
+          <div className="bg-white/95 backdrop-blur p-8 rounded-xl shadow-lg border border-slate-200">
+            {allUsers.length === 0 && (
+              <p className="text-slate-500 text-center py-8 text-lg">👥 他のユーザーがいません。</p>
+            )}
+            <ul className="flex flex-col gap-4">
+              {allUsers.map((user) => (
+                <li
+                  key={user.id}
+                  className="p-6 rounded-xl border-2 border-slate-200 bg-white hover:shadow-lg hover:border-emerald-300 transition-all duration-300 animate-fade-in"
+                >
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="font-bold text-slate-800 text-lg">
+                        👤 {user.name}
+                      </div>
+                      <div className="text-sm text-slate-500 mt-1">
+                        📅 登録日: {new Date(user.created_at).toLocaleDateString('ja-JP')}
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600">
-                      登録日:{' '}
-                      {new Date(user.created_at).toLocaleDateString('ja-JP')}
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
                     <button
-                      className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                      className="bg-gradient-primary hover:shadow-lg text-white font-bold py-2 px-6 rounded-lg transition-all transform hover:scale-105 shadow-md"
                       onClick={() => connect(user)}
                     >
-                      接続
+                      🔗 接続
                     </button>
                   </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        <h2 className="text-2xl font-bold text-gray-800 mt-8 mb-4">
-          マッチング履歴
-        </h2>
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          <ul className="flex flex-col gap-3">
-            {matches.length === 0 && (
-              <p className="text-gray-600">まだマッチングはありません。</p>
-            )}
-            {matches.map((m) => (
-              <li
-                key={m.id}
-                className="p-4 rounded-lg border border-green-100 hover:bg-gray-50 transition-colors"
-              >
-                <div className="text-sm text-gray-600">
-                  {new Date(m.created_at).toLocaleDateString('ja-JP')}
-                </div>
-                <div className="font-semibold text-gray-800">
-                  ステータス: {m.status}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-    </main>
+          <h2 className="text-3xl font-bold text-slate-800 mt-12 mb-6">📋 マッチング履歴</h2>
+          <div className="bg-white/95 backdrop-blur p-8 rounded-xl shadow-lg border border-slate-200">
+            <ul className="flex flex-col gap-4">
+              {matches.length === 0 && <p className="text-slate-500 text-center py-8 text-lg">📭 まだマッチングはありません。</p>}
+              {matches.map((m) => (
+                <li key={m.id} className="p-4 rounded-xl border-2 border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 hover:shadow-md transition-all animate-fade-in">
+                  <div className="text-sm text-slate-600">
+                    📅 {new Date(m.created_at).toLocaleDateString('ja-JP')}
+                  </div>
+                  <div className="font-semibold text-slate-800">ステータス: <span className="text-cyan-600">{m.status}</span></div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }
 

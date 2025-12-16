@@ -50,31 +50,34 @@ function HomePage() {
   if (loading) return <div className="p-5">読み込み中...</div>;
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
+    <div className="flex flex-col min-h-screen bg-gradient-subtle">
       <main className="flex-1 flex flex-col">
-        <header className="bg-white p-8 shadow-md flex justify-between items-center">
-          <h1 className="text-4xl font-bold text-gray-800">
-            ようこそ、{currentUser.name}さん！
-          </h1>
+        <header className="bg-white/95 backdrop-blur p-8 shadow-lg border-b border-slate-200 flex justify-between items-center">
+          <div>
+            <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
+              ようこそ！
+            </h1>
+            <p className="text-lg text-slate-600">{currentUser.name}さんのスキル交換プラットフォーム</p>
+          </div>
           <button
             onClick={() => navigate('/profile')}
-            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-5 rounded-lg transition-colors"
+            className="bg-gradient-primary hover:shadow-lg text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105"
           >
-            プロフィールを見る
+            👤 プロフィール
           </button>
         </header>
 
         {error && (
-          <div className="text-red-600 text-sm p-5 bg-red-50 m-5 rounded-lg">
+          <div className="text-red-600 text-sm p-4 bg-red-50/95 mx-8 mt-6 rounded-lg border border-red-200 backdrop-blur">
             {error}
           </div>
         )}
 
         <section className="p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            最近のマッチング
+          <h2 className="text-3xl font-bold text-slate-800 mb-6">
+            ✨ 最近のマッチング
           </h2>
-          <div className="bg-white p-8 rounded-lg shadow-md min-h-52 flex items-center justify-center">
+          <div className="bg-white/95 backdrop-blur p-8 rounded-xl shadow-lg border border-slate-200 min-h-52 flex items-center justify-center">
             <RecentMatches
               matches={matches}
               selectedId={selected ? selected.id : null}
@@ -89,28 +92,28 @@ function HomePage() {
 
 function RecentMatches({ matches, selectedId, onSelect }) {
   if (!matches || matches.length === 0) {
-    return <p className="text-gray-600">最近のマッチングはありません。</p>;
+    return <p className="text-slate-500 text-center text-lg">📭 最近のマッチングはありません。</p>;
   }
 
   return (
-    <ul className="w-full flex flex-col gap-3">
+    <ul className="w-full flex flex-col gap-3 animate-fade-in">
       {matches.slice(0, 10).map((m) => (
         <li
           key={m.id}
-          className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
+          className={`p-5 rounded-xl transition-all duration-300 cursor-pointer transform hover:scale-102 border-2 ${
             selectedId === m.id
-              ? 'border-green-500 bg-green-50'
-              : 'border-green-100 bg-white hover:bg-gray-50'
+              ? 'border-emerald-500 bg-gradient-to-r from-emerald-50 to-cyan-50 shadow-md'
+              : 'border-slate-200 bg-white hover:shadow-lg'
           }`}
           onClick={() => onSelect(m)}
           role="button"
           tabIndex={0}
         >
-          <div className="text-sm text-gray-600">
-            {new Date(m.created_at).toLocaleDateString('ja-JP')}
+          <div className="text-sm text-slate-500 mb-2">
+            📅 {new Date(m.created_at).toLocaleDateString('ja-JP')}
           </div>
-          <div className="text-base font-semibold text-gray-800">
-            ステータス: {m.status}
+          <div className="text-lg font-semibold text-slate-800">
+            ステータス: <span className="text-emerald-600">{m.status}</span>
           </div>
         </li>
       ))}
