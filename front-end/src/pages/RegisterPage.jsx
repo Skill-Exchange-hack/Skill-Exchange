@@ -55,8 +55,10 @@ function RegisterPage() {
         <h2 className="text-4xl font-bold mb-3 bg-gradient-primary bg-clip-text text-transparent text-center">
           スキル交換
         </h2>
-        <p className="text-slate-600 text-center mb-8 text-sm">新しいユーザーを登録して始めましょう</p>
-        
+        <p className="text-slate-600 text-center mb-8 text-sm">
+          新しいユーザーを登録して始めましょう
+        </p>
+
         <form onSubmit={submit}>
           <label className="block text-slate-700 font-bold mb-3 text-lg">
             ユーザー名
@@ -68,9 +70,15 @@ function RegisterPage() {
             disabled={loading}
             className="w-full px-5 py-3 border-2 border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent mb-6 transition-all"
           />
-          {error && <div className="text-red-600 text-sm mb-4 p-3 bg-red-50/95 rounded-lg border border-red-200 font-semibold">{error}</div>}
+          {error && (
+            <div className="text-red-600 text-sm mb-4 p-3 bg-red-50/95 rounded-lg border border-red-200 font-semibold">
+              {error}
+            </div>
+          )}
           {success && (
-            <div className="text-emerald-600 text-sm mb-4 p-3 bg-emerald-50/95 rounded-lg border border-emerald-200 font-semibold">{success}</div>
+            <div className="text-emerald-600 text-sm mb-4 p-3 bg-emerald-50/95 rounded-lg border border-emerald-200 font-semibold">
+              {success}
+            </div>
           )}
           <button
             type="submit"

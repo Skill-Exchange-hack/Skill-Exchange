@@ -1,5 +1,6 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ function HomePage() {
     return <div className="p-5">リダイレクト中...</div>;
   }
 
-  if (loading) return <div className="p-5">読み込み中...</div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-subtle">
@@ -57,7 +58,9 @@ function HomePage() {
             <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
               ようこそ！
             </h1>
-            <p className="text-lg text-slate-600">{currentUser.name}さんのスキル交換プラットフォーム</p>
+            <p className="text-lg text-slate-600">
+              {currentUser.name}さんのスキル交換プラットフォーム
+            </p>
           </div>
           <button
             onClick={() => navigate('/profile')}
@@ -92,7 +95,11 @@ function HomePage() {
 
 function RecentMatches({ matches, selectedId, onSelect }) {
   if (!matches || matches.length === 0) {
-    return <p className="text-slate-500 text-center text-lg">📭 最近のマッチングはありません。</p>;
+    return (
+      <p className="text-slate-500 text-center text-lg">
+        📭 最近のマッチングはありません。
+      </p>
+    );
   }
 
   return (

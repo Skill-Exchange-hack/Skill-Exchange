@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 function MatchesPage() {
   const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -105,7 +106,7 @@ function MatchesPage() {
     return <div className="p-5">リダイレクト中...</div>;
   }
 
-  if (loading) return <div className="p-5">読み込み中...</div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-subtle">
@@ -114,7 +115,9 @@ function MatchesPage() {
           <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             🤝 マッチング
           </h1>
-          <p className="text-slate-600 mt-2">他のユーザーとスキルを交換しましょう</p>
+          <p className="text-slate-600 mt-2">
+            他のユーザーとスキルを交換しましょう
+          </p>
         </header>
 
         {error && (
@@ -124,10 +127,14 @@ function MatchesPage() {
         )}
 
         <section className="p-8">
-          <h2 className="text-3xl font-bold text-slate-800 mb-6">✨ ユーザー一覧</h2>
+          <h2 className="text-3xl font-bold text-slate-800 mb-6">
+            ✨ ユーザー一覧
+          </h2>
           <div className="bg-white/95 backdrop-blur p-8 rounded-xl shadow-lg border border-slate-200">
             {allUsers.length === 0 && (
-              <p className="text-slate-500 text-center py-8 text-lg">👥 他のユーザーがいません。</p>
+              <p className="text-slate-500 text-center py-8 text-lg">
+                👥 他のユーザーがいません。
+              </p>
             )}
             <ul className="flex flex-col gap-4">
               {allUsers.map((user) => (
@@ -141,7 +148,8 @@ function MatchesPage() {
                         👤 {user.name}
                       </div>
                       <div className="text-sm text-slate-500 mt-1">
-                        📅 登録日: {new Date(user.created_at).toLocaleDateString('ja-JP')}
+                        📅 登録日:{' '}
+                        {new Date(user.created_at).toLocaleDateString('ja-JP')}
                       </div>
                     </div>
                     <button
@@ -156,16 +164,28 @@ function MatchesPage() {
             </ul>
           </div>
 
-          <h2 className="text-3xl font-bold text-slate-800 mt-12 mb-6">📋 マッチング履歴</h2>
+          <h2 className="text-3xl font-bold text-slate-800 mt-12 mb-6">
+            📋 マッチング履歴
+          </h2>
           <div className="bg-white/95 backdrop-blur p-8 rounded-xl shadow-lg border border-slate-200">
             <ul className="flex flex-col gap-4">
-              {matches.length === 0 && <p className="text-slate-500 text-center py-8 text-lg">📭 まだマッチングはありません。</p>}
+              {matches.length === 0 && (
+                <p className="text-slate-500 text-center py-8 text-lg">
+                  📭 まだマッチングはありません。
+                </p>
+              )}
               {matches.map((m) => (
-                <li key={m.id} className="p-4 rounded-xl border-2 border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 hover:shadow-md transition-all animate-fade-in">
+                <li
+                  key={m.id}
+                  className="p-4 rounded-xl border-2 border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 hover:shadow-md transition-all animate-fade-in"
+                >
                   <div className="text-sm text-slate-600">
                     📅 {new Date(m.created_at).toLocaleDateString('ja-JP')}
                   </div>
-                  <div className="font-semibold text-slate-800">ステータス: <span className="text-cyan-600">{m.status}</span></div>
+                  <div className="font-semibold text-slate-800">
+                    ステータス:{' '}
+                    <span className="text-cyan-600">{m.status}</span>
+                  </div>
                 </li>
               ))}
             </ul>

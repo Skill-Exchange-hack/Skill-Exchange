@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\DesiredSkill;
+use App\Models\Skill;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class DesiredSkillController extends Controller
 {
@@ -19,13 +21,40 @@ class DesiredSkillController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'skill_id' => 'required|exists:skills,id',
-        ]);
+        try {
+            Log::info('DesiredSkill store request:', $request->all());
 
-        $desiredSkill = DesiredSkill::create($validated);
-        return response()->json($desiredSkill, 201);
+            // スキルが存在するか確認
+            $skill = Skill::find($request->skill_id);
+            if (!$skill) {
+                Log::warning('Skill not found:', ['skill_id' => $request->skill_id]);
+                Log::info('Available skills:', Skill::all(['id', 'name'])->toArray());
+                return response()->json([
+                    'error' => 'Skill not found',
+                    'skill_id' => $request->skill_id,
+                    'available_skills' => Skill::all(['id', 'name'])->toArray(),
+                ], 404);
+            }
+
+            $validated = $request->validate([
+                'user_id' => 'required|integer|exists:users,id',
+                'skill_id' => 'required|integer|exists:skills,id',
+                'priority' => 'nullable|integer|min:1|max:3',
+            ]);
+
+            $desiredSkill = DesiredSkill::create($validated);
+            Log::info('DesiredSkill created:', $desiredSkill->toArray());
+            return response()->json($desiredSkill, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Validation failed:', $e->errors());
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Error creating DesiredSkill:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function show(DesiredSkill $desiredSkill)
@@ -49,3 +78,4 @@ class DesiredSkillController extends Controller
         return response()->json(['message' => 'DesiredSkill deleted successfully']);
     }
 }
+

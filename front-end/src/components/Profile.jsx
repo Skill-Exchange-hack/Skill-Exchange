@@ -1,5 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from './LoadingSpinner';
+
+// プログラミング言語キーと skill_id のマッピング
+const LANGUAGE_SKILL_MAP = {
+  javascript: 1,
+  python: 2,
+  java: 3,
+  csharp: 4,
+  cpp: 5,
+  php: 6,
+  ruby: 7,
+  go: 8,
+  rust: 9,
+  typescript: 10,
+  kotlin: 11,
+  swift: 12,
+};
 
 function Profile() {
   const navigate = useNavigate();
@@ -7,9 +24,18 @@ function Profile() {
   const [user, setUser] = useState(currentUser);
   const [skills, setSkills] = useState([]);
   const [desired, setDesired] = useState([]);
+  const [allSkills, setAllSkills] = useState([]);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAddSkillForm, setShowAddSkillForm] = useState(false);
+  const [showAddDesiredForm, setShowAddDesiredForm] = useState(false);
+  const [newSkill, setNewSkill] = useState({
+    skill_id: '',
+    level: '初級',
+    description: '',
+  });
+  const [newDesired, setNewDesired] = useState({ skill_id: '', priority: 1 });
 
   // ユーザーが登録されていない場合はリダイレクト
   useEffect(() => {
@@ -24,38 +50,66 @@ function Profile() {
         setLoading(true);
         setError(null);
 
+        // スキル一覧を取得
+        console.log('Fetching /api/skills...');
+        const allSkillsRes = await fetch('http://localhost:8000/api/skills');
+        console.log('Skills response:', allSkillsRes.status);
+        if (!allSkillsRes.ok) {
+          const errorData = await allSkillsRes.json().catch(() => ({}));
+          console.error('Skills error:', errorData);
+          throw new Error(`スキル一覧取得エラー: ${allSkillsRes.status}`);
+        }
+        const allSkillsData = await allSkillsRes.json();
+        console.log('Skills data:', allSkillsData);
+        setAllSkills(allSkillsData);
+
         // ユーザー情報取得
+        console.log('Fetching /api/users/' + currentUser.id);
         const userRes = await fetch(
           `http://localhost:8000/api/users/${currentUser.id}`
         );
+        console.log('User response:', userRes.status);
         if (!userRes.ok) {
-          throw new Error(`HTTP ${userRes.status}: ${userRes.statusText}`);
+          const errorData = await userRes.json().catch(() => ({}));
+          console.error('User error:', errorData);
+          throw new Error(`ユーザー取得エラー: HTTP ${userRes.status}`);
         }
         const userData = await userRes.json();
+        console.log('User data:', userData);
         setUser(userData);
 
         // スキル取得
+        console.log('Fetching /api/user-skills?user_id=' + currentUser.id);
         const skillsRes = await fetch(
           `http://localhost:8000/api/user-skills?user_id=${currentUser.id}`
         );
+        console.log('User skills response:', skillsRes.status);
         if (!skillsRes.ok) {
+          const errorData = await skillsRes.json().catch(() => ({}));
+          console.error('User skills error:', errorData);
           throw new Error(`スキル取得エラー: ${skillsRes.status}`);
         }
         const skillsData = await skillsRes.json();
+        console.log('Skills data:', skillsData);
         setSkills(skillsData);
 
         // 欲しいスキル取得
+        console.log('Fetching /api/desired-skills?user_id=' + currentUser.id);
         const desiredRes = await fetch(
           `http://localhost:8000/api/desired-skills?user_id=${currentUser.id}`
         );
+        console.log('Desired skills response:', desiredRes.status);
         if (!desiredRes.ok) {
+          const errorData = await desiredRes.json().catch(() => ({}));
+          console.error('Desired skills error:', errorData);
           throw new Error(`欲しいスキル取得エラー: ${desiredRes.status}`);
         }
         const desiredData = await desiredRes.json();
+        console.log('Desired skills data:', desiredData);
         setDesired(desiredData);
       } catch (err) {
         setError('データの取得に失敗しました: ' + err.message);
-        console.error(err);
+        console.error('Fetch error:', err);
       } finally {
         setLoading(false);
       }
@@ -83,11 +137,96 @@ function Profile() {
     }
   };
 
+  const handleAddUserSkill = async (
+    skillKey,
+    level = '初級',
+    description = ''
+  ) => {
+    try {
+      const skillId = LANGUAGE_SKILL_MAP[skillKey];
+      if (!skillId) {
+        setError('選択されたスキルが無効です');
+        return;
+      }
+
+      const res = await fetch('http://localhost:8000/api/user-skills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          skill_id: skillId,
+          level: level,
+          description: description,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('バックエンドエラー:', errorData);
+        throw new Error(
+          errorData.errors
+            ? Object.values(errorData.errors).flat().join(', ')
+            : `HTTP ${res.status}: ${res.statusText}`
+        );
+      }
+
+      const newSkillData = await res.json();
+      setSkills([...skills, newSkillData]);
+      setShowAddSkillForm(false);
+      setNewSkill({ skill_id: '', level: '初級', description: '' });
+      console.log('スキルを追加しました:', newSkillData);
+    } catch (err) {
+      console.error(err);
+      setError('スキル追加に失敗しました: ' + err.message);
+    }
+  };
+
+  const handleAddDesiredSkill = async (skillKey, priority = 1) => {
+    try {
+      const skillId = LANGUAGE_SKILL_MAP[skillKey];
+      if (!skillId) {
+        setError('選択されたスキルが無効です');
+        return;
+      }
+
+      const res = await fetch('http://localhost:8000/api/desired-skills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          skill_id: skillId,
+          priority: priority,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('バックエンドエラー:', errorData);
+        throw new Error(
+          errorData.errors
+            ? Object.values(errorData.errors).flat().join(', ')
+            : `HTTP ${res.status}: ${res.statusText}`
+        );
+      }
+
+      const newDesiredData = await res.json();
+      setDesired([...desired, newDesiredData]);
+      setShowAddDesiredForm(false);
+      setNewDesired({ skill_id: '', priority: 1 });
+      console.log('習得したいスキルを追加しました:', newDesiredData);
+    } catch (err) {
+      console.error(err);
+      setError('習得スキル追加に失敗しました: ' + err.message);
+    }
+  };
+
   if (!currentUser || !currentUser.id) {
     return <div className="p-5">リダイレクト中...</div>;
   }
 
-  if (loading) return <div className="p-5">読み込み中...</div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="max-w-5xl mx-auto p-8 bg-gradient-subtle min-h-screen">
@@ -102,9 +241,14 @@ function Profile() {
                 onChange={(e) => setUser({ ...user, name: e.target.value })}
               />
             ) : (
-              <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">{user.name}</h1>
+              <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
+                {user.name}
+              </h1>
             )}
-            <p className="text-slate-600 text-lg">ユーザーID: <span className="font-semibold text-slate-800">{user.id}</span></p>
+            <p className="text-slate-600 text-lg">
+              ユーザーID:{' '}
+              <span className="font-semibold text-slate-800">{user.id}</span>
+            </p>
           </div>
           {editing ? (
             <div className="flex gap-3">
@@ -143,18 +287,95 @@ function Profile() {
         )}
 
         <section className="bg-white/95 backdrop-blur border border-slate-200 p-8 rounded-2xl shadow-lg">
-          <h2 className="text-3xl font-bold text-slate-800 mb-6">
-            🎓 自分のスキル（教えられる）
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-3xl font-bold text-slate-800">
+              🎓 自分のスキル（教えられる）
+            </h2>
+            <button
+              className="bg-gradient-primary hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105 flex items-center gap-2"
+              onClick={() => setShowAddSkillForm(!showAddSkillForm)}
+            >
+              {showAddSkillForm ? '✕' : '➕'}{' '}
+              {showAddSkillForm ? 'キャンセル' : '追加'}
+            </button>
+          </div>
+
+          {showAddSkillForm && (
+            <div className="mb-6 p-5 bg-emerald-50 border-2 border-emerald-300 rounded-lg animate-slide-up">
+              <div className="space-y-4">
+                <select
+                  className="w-full px-4 py-2 border-2 border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  value={newSkill.skill_id}
+                  onChange={(e) =>
+                    setNewSkill({ ...newSkill, skill_id: e.target.value })
+                  }
+                >
+                  <option value="">プログラミング言語を選択</option>
+                  <option value="javascript">JavaScript</option>
+                  <option value="python">Python</option>
+                  <option value="java">Java</option>
+                  <option value="csharp">C#</option>
+                  <option value="cpp">C++</option>
+                  <option value="php">PHP</option>
+                  <option value="ruby">Ruby</option>
+                  <option value="go">Go</option>
+                  <option value="rust">Rust</option>
+                  <option value="typescript">TypeScript</option>
+                  <option value="kotlin">Kotlin</option>
+                  <option value="swift">Swift</option>
+                </select>
+                <select
+                  className="w-full px-4 py-2 border-2 border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  value={newSkill.level}
+                  onChange={(e) =>
+                    setNewSkill({ ...newSkill, level: e.target.value })
+                  }
+                >
+                  <option value="初級">初級</option>
+                  <option value="中級">中級</option>
+                  <option value="上級">上級</option>
+                  <option value="エキスパート">エキスパート</option>
+                </select>
+                <textarea
+                  placeholder="説明（任意）"
+                  className="w-full px-4 py-2 border-2 border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  rows="2"
+                  value={newSkill.description}
+                  onChange={(e) =>
+                    setNewSkill({ ...newSkill, description: e.target.value })
+                  }
+                />
+                <button
+                  className="w-full bg-gradient-primary hover:shadow-lg text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105"
+                  onClick={() => {
+                    if (newSkill.skill_id) {
+                      handleAddUserSkill(
+                        newSkill.skill_id,
+                        newSkill.level,
+                        newSkill.description
+                      );
+                    }
+                  }}
+                >
+                  ✓ 追加する
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-3">
             {skills.length === 0 ? (
-              <p className="text-slate-500 text-lg">スキルが登録されていません。</p>
+              <p className="text-slate-500 text-lg">
+                スキルが登録されていません。
+              </p>
             ) : (
               skills.map((skill) => (
                 <div key={skill.id} className="animate-fade-in">
                   <span className="inline-block px-5 py-2 bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-800 rounded-full text-sm font-bold border-2 border-emerald-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110">
-                    {skill.skill ? skill.skill.name : skill.name} 
-                    <span className="ml-2 text-emerald-600 font-bold">Lv{skill.level || '?'}</span>
+                    {skill.skill ? skill.skill.name : skill.name}
+                    <span className="ml-2 text-emerald-600 font-bold">
+                      Lv{skill.level || '?'}
+                    </span>
                   </span>
                 </div>
               ))
@@ -163,18 +384,87 @@ function Profile() {
         </section>
 
         <section className="bg-white/95 backdrop-blur border border-slate-200 p-8 rounded-2xl shadow-lg">
-          <h2 className="text-3xl font-bold text-slate-800 mb-6">
-            🚀 習得したいスキル（教わりたい）
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-3xl font-bold text-slate-800">
+              🚀 習得したいスキル（教わりたい）
+            </h2>
+            <button
+              className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105 flex items-center gap-2"
+              onClick={() => setShowAddDesiredForm(!showAddDesiredForm)}
+            >
+              {showAddDesiredForm ? '✕' : '➕'}{' '}
+              {showAddDesiredForm ? 'キャンセル' : '追加'}
+            </button>
+          </div>
+
+          {showAddDesiredForm && (
+            <div className="mb-6 p-5 bg-cyan-50 border-2 border-cyan-300 rounded-lg animate-slide-up">
+              <div className="space-y-4">
+                <select
+                  className="w-full px-4 py-2 border-2 border-cyan-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  value={newDesired.skill_id}
+                  onChange={(e) =>
+                    setNewDesired({ ...newDesired, skill_id: e.target.value })
+                  }
+                >
+                  <option value="">プログラミング言語を選択</option>
+                  <option value="javascript">JavaScript</option>
+                  <option value="python">Python</option>
+                  <option value="java">Java</option>
+                  <option value="csharp">C#</option>
+                  <option value="cpp">C++</option>
+                  <option value="php">PHP</option>
+                  <option value="ruby">Ruby</option>
+                  <option value="go">Go</option>
+                  <option value="rust">Rust</option>
+                  <option value="typescript">TypeScript</option>
+                  <option value="kotlin">Kotlin</option>
+                  <option value="swift">Swift</option>
+                </select>
+                <select
+                  className="w-full px-4 py-2 border-2 border-cyan-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  value={newDesired.priority}
+                  onChange={(e) =>
+                    setNewDesired({
+                      ...newDesired,
+                      priority: parseInt(e.target.value),
+                    })
+                  }
+                >
+                  <option value="1">優先度1（低）</option>
+                  <option value="2">優先度2（中）</option>
+                  <option value="3">優先度3（高）</option>
+                </select>
+                <button
+                  className="w-full bg-cyan-500 hover:shadow-lg text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105"
+                  onClick={() => {
+                    if (newDesired.skill_id) {
+                      handleAddDesiredSkill(
+                        newDesired.skill_id,
+                        newDesired.priority
+                      );
+                    }
+                  }}
+                >
+                  ✓ 追加する
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-3">
             {desired.length === 0 ? (
-              <p className="text-slate-500 text-lg">習得したいスキルがありません。</p>
+              <p className="text-slate-500 text-lg">
+                習得したいスキルがありません。
+              </p>
             ) : (
               desired.map((d) => (
                 <div key={d.id} className="animate-fade-in">
                   <span className="inline-block px-5 py-2 bg-gradient-to-r from-cyan-100 to-cyan-50 text-cyan-800 rounded-full text-sm font-bold border-2 border-cyan-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110">
-                    {d.skill ? d.skill.name : d.name} 
-                    <span className="ml-2 text-cyan-600 font-bold">優先度{d.priority}</span>
+                    {d.skill ? d.skill.name : d.name}
+                    <span className="ml-2 text-cyan-600 font-bold">
+                      優先度{d.priority}
+                    </span>
                   </span>
                 </div>
               ))

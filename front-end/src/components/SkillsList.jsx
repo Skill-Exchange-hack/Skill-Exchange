@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import LoadingSpinner from './LoadingSpinner';
 
 function SkillsList() {
   const [skills, setSkills] = useState([]);
@@ -45,8 +46,11 @@ function SkillsList() {
     }
   }, [currentUser.id]);
 
-  if (loading) return <div className="p-5 text-slate-600">読み込み中...</div>;
-  if (error) return <div className="text-red-600 p-5 text-center font-semibold">{error}</div>;
+  if (loading) return <LoadingSpinner />;
+  if (error)
+    return (
+      <div className="text-red-600 p-5 text-center font-semibold">{error}</div>
+    );
 
   return (
     <div className="flex flex-col gap-6">
@@ -63,7 +67,8 @@ function SkillsList() {
               key={s.id}
               className="inline-block px-4 py-2 bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-800 rounded-full text-sm font-bold border-2 border-emerald-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110 animate-fade-in"
             >
-              {s.skill ? s.skill.name : s.name} <span className="ml-2 text-emerald-600">Lv{s.level || '?'}</span>
+              {s.skill ? s.skill.name : s.name}{' '}
+              <span className="ml-2 text-emerald-600">Lv{s.level || '?'}</span>
             </span>
           ))}
         </div>
@@ -82,7 +87,8 @@ function SkillsList() {
               key={d.id}
               className="inline-block px-4 py-2 bg-gradient-to-r from-cyan-100 to-cyan-50 text-cyan-800 rounded-full text-sm font-bold border-2 border-cyan-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110 animate-fade-in"
             >
-              {d.skill ? d.skill.name : d.name} <span className="ml-2 text-cyan-600">優先度{d.priority}</span>
+              {d.skill ? d.skill.name : d.name}{' '}
+              <span className="ml-2 text-cyan-600">優先度{d.priority}</span>
             </span>
           ))}
         </div>
