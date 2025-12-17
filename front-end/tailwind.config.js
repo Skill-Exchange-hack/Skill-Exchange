@@ -14,7 +14,7 @@ export default {
         'gradient-primary': 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
         'gradient-secondary': 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
         'gradient-accent': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-        'gradient-subtle': 'linear-gradient(135deg, #f0f9ff 0%, #ecfdf5 50%, #fef3c7 100%)',
+        'gradient-subtle': 'linear-gradient(135deg, #ffffff 0%, #f9fafb 50%, #f8fafc 100%)',
         'gradient-dark': 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
       },
       animation: {
