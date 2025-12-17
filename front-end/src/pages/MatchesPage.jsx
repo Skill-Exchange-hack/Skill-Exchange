@@ -26,15 +26,6 @@ function MatchesPage() {
         setLoading(true);
         setError(null);
 
-        // すべてのユーザーを取得
-        const usersRes = await fetch('http://localhost:8000/api/users');
-        if (!usersRes.ok) {
-          throw new Error(`ユーザー取得エラー: ${usersRes.status}`);
-        }
-        const usersData = await usersRes.json();
-        const otherUsers = usersData.filter((u) => u.id !== currentUser.id);
-        setAllUsers(otherUsers);
-
         // すべてのスキルを取得
         const allSkillsRes = await fetch('http://localhost:8000/api/skills');
         if (!allSkillsRes.ok) {
@@ -46,9 +37,21 @@ function MatchesPage() {
           skillMap[skill.id] = skill;
         });
 
+        // バックエンドからマッチングユーザーを取得
+        const matchingUsersRes = await fetch(
+          `http://localhost:8000/api/users/matching?user_id=${currentUser.id}`
+        );
+        if (!matchingUsersRes.ok) {
+          throw new Error(
+            `マッチングユーザー取得エラー: ${matchingUsersRes.status}`
+          );
+        }
+        const matchingUsersData = await matchingUsersRes.json();
+        setAllUsers(matchingUsersData);
+
         // 各ユーザーのスキルを取得
         const userSkillsMapTemp = {};
-        for (const user of otherUsers) {
+        for (const user of matchingUsersData) {
           const skillRes = await fetch(
             `http://localhost:8000/api/user-skills?user_id=${user.id}`
           );
