@@ -37,4 +37,16 @@ class UserMatch extends Model
     {
         return $this->belongsTo(Skill::class, 'skill_from_user2');
     }
+
+    // チャットルームとの関係
+    public function chatRoom()
+    {
+        return $this->hasOne(ChatRoom::class, 'match_id');
+    }
+
+    // 2人のユーザーを取得
+    public function users()
+    {
+        return [$this->user1, $this->user2];
+    }
 }

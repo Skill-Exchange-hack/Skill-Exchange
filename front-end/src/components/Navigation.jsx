@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import skillExchangeLogo from '../image.png';
 
 function Navigation() {
   const location = useLocation();
@@ -32,7 +33,11 @@ function Navigation() {
     <nav className="bg-gradient-to-r from-slate-900 to-slate-800 px-8 py-5 shadow-2xl sticky top-0 z-50 border-b border-slate-700">
       <div className="flex justify-between items-center">
         <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-          プロチェン
+          <img
+            src={skillExchangeLogo}
+            alt="Skill Exchange Logo"
+            className="h-16 w-16"
+          />
         </div>
         <div className="flex gap-1">
           <Link
@@ -56,6 +61,16 @@ function Navigation() {
                 }`}
               >
                 🤝 マッチング
+              </Link>
+              <Link
+                to="/chat-rooms"
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  isActive('/chat-rooms')
+                    ? 'bg-gradient-primary text-white shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-slate-700'
+                }`}
+              >
+                💬 メッセージ
               </Link>
               <Link
                 to="/dashboard"

@@ -42,6 +42,19 @@ class DesiredSkillController extends Controller
                 'priority' => 'nullable|integer|min:1|max:3',
             ]);
 
+            // 同じユーザーが同じスキルを既に追加しているか確認
+            $existingDesired = DesiredSkill::where('user_id', $validated['user_id'])
+                ->where('skill_id', $validated['skill_id'])
+                ->first();
+
+            if ($existingDesired) {
+                Log::warning('Duplicate desired skill:', $validated);
+                return response()->json([
+                    'error' => 'このスキルは既に追加されています',
+                    'desired_skill' => $existingDesired,
+                ], 409);  // 409 Conflict
+            }
+
             $desiredSkill = DesiredSkill::create($validated);
             Log::info('DesiredSkill created:', $desiredSkill->toArray());
             return response()->json($desiredSkill, 201);

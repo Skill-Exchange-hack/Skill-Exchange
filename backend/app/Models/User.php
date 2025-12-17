@@ -38,4 +38,10 @@ class User extends Model
     {
         return $this->hasMany(UserMatch::class, 'user2_id');
     }
+
+    // 送信したチャットメッセージ
+    public function sentMessages()
+    {
+        return $this->hasMany(ChatMessage::class, 'sender_id');
+    }
 }

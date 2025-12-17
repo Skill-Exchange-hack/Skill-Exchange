@@ -127,7 +127,18 @@ function MatchesPage() {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      alert(`✓ ${user.name}さんとマッチしました！`);
+
+      const data = await response.json();
+      console.log('マッチング作成成功:', data);
+
+      // チャットルームIDを取得してリダイレクト
+      const chatRoomId = data.chat_room_id;
+      navigate(`/chat/${chatRoomId}`, {
+        state: {
+          match: data.user_match,
+          otherUser: user,
+        },
+      });
     } catch (err) {
       alert('マッチング作成エラー: ' + err.message);
       console.error(err);
@@ -160,7 +171,7 @@ function MatchesPage() {
 
         <section className="p-8">
           <h2 className="text-3xl font-bold text-slate-800 mb-6">
-            ✨ ユーザー一覧
+            ✨ あなたがほしいスキルを持っているユーザーたち
           </h2>
           <div className="bg-white/95 backdrop-blur p-8 rounded-xl shadow-lg border border-slate-200">
             {allUsers.length === 0 && (
@@ -225,20 +236,22 @@ function MatchesPage() {
                   📭 まだマッチングはありません。
                 </p>
               )}
-              {matches.map((m) => (
-                <li
-                  key={m.id}
-                  className="p-4 rounded-xl border-2 border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 hover:shadow-md transition-all animate-fade-in"
-                >
-                  <div className="text-sm text-slate-600">
-                    📅 {new Date(m.created_at).toLocaleDateString('ja-JP')}
-                  </div>
-                  <div className="font-semibold text-slate-800">
-                    ステータス:{' '}
-                    <span className="text-cyan-600">{m.status}</span>
-                  </div>
-                </li>
-              ))}
+              {matches.map((m) => {
+                // 相手ユーザーを特定
+                const otherUser =
+                  m.user1_id === currentUser.id ? m.user2 : m.user1;
+
+                return (
+                  <li
+                    key={m.id}
+                    className="p-4 rounded-xl border-2 border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 hover:shadow-md transition-all animate-fade-in"
+                  >
+                    <div className="text-sm text-slate-700 font-medium">
+                      💬 {otherUser.name}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </section>

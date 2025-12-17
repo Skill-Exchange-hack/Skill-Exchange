@@ -46,6 +46,44 @@ function SkillsList() {
     }
   }, [currentUser.id]);
 
+  const handleDeleteUserSkill = async (skillId) => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/user-skills/${skillId}`,
+        {
+          method: 'DELETE',
+        }
+      );
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      setSkills(skills.filter((s) => s.id !== skillId));
+      console.log('スキルを削除しました:', skillId);
+    } catch (err) {
+      console.error(err);
+      setError('スキル削除に失敗しました: ' + err.message);
+    }
+  };
+
+  const handleDeleteDesiredSkill = async (desiredId) => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/desired-skills/${desiredId}`,
+        {
+          method: 'DELETE',
+        }
+      );
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      setDesired(desired.filter((d) => d.id !== desiredId));
+      console.log('習得したいスキルを削除しました:', desiredId);
+    } catch (err) {
+      console.error(err);
+      setError('習得スキル削除に失敗しました: ' + err.message);
+    }
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error)
     return (
@@ -63,13 +101,20 @@ function SkillsList() {
             <p className="text-slate-500">スキルが登録されていません。</p>
           )}
           {skills.map((s) => (
-            <span
-              key={s.id}
-              className="inline-block px-4 py-2 bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-800 rounded-full text-sm font-bold border-2 border-emerald-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110 animate-fade-in"
-            >
-              {s.skill ? s.skill.name : s.name}{' '}
-              <span className="ml-2 text-emerald-600">Lv{s.level || '?'}</span>
-            </span>
+            <div key={s.id} className="relative group">
+              <span className="inline-block px-4 py-2 bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-800 rounded-full text-sm font-bold border-2 border-emerald-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110 animate-fade-in">
+                {s.skill ? s.skill.name : s.name}{' '}
+                <span className="ml-2 text-emerald-600">
+                  Lv{s.level || '?'}
+                </span>
+              </span>
+              <button
+                onClick={() => handleDeleteUserSkill(s.id)}
+                className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                ✕
+              </button>
+            </div>
           ))}
         </div>
       </div>
@@ -83,13 +128,18 @@ function SkillsList() {
             <p className="text-slate-500">習得したいスキルがありません。</p>
           )}
           {desired.map((d) => (
-            <span
-              key={d.id}
-              className="inline-block px-4 py-2 bg-gradient-to-r from-cyan-100 to-cyan-50 text-cyan-800 rounded-full text-sm font-bold border-2 border-cyan-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110 animate-fade-in"
-            >
-              {d.skill ? d.skill.name : d.name}{' '}
-              <span className="ml-2 text-cyan-600">優先度{d.priority}</span>
-            </span>
+            <div key={d.id} className="relative group">
+              <span className="inline-block px-4 py-2 bg-gradient-to-r from-cyan-100 to-cyan-50 text-cyan-800 rounded-full text-sm font-bold border-2 border-cyan-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110 animate-fade-in">
+                {d.skill ? d.skill.name : d.name}{' '}
+                <span className="ml-2 text-cyan-600">優先度{d.priority}</span>
+              </span>
+              <button
+                onClick={() => handleDeleteDesiredSkill(d.id)}
+                className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                ✕
+              </button>
+            </div>
           ))}
         </div>
       </div>

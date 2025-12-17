@@ -2,12 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700&display=swap');
+
 @layer base {
-  body {
-    @apply font-sans bg-gray-100;
+  * {
+    @apply transition-colors duration-300;
   }
-  
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans bg-gradient-subtle text-slate-800;
+    font-family: 'Inter', 'Sora', system-ui, -apple-system, sans-serif;
+    background-attachment: fixed;
+  }
+
   a {
     @apply text-inherit no-underline;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+    font-family: 'Sora', system-ui, -apple-system, sans-serif;
+  }
+
+  /* スクロールバーのカスタマイズ */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-gradient-primary text-white font-bold rounded-lg shadow-lg hover:shadow-glow-lg transform hover:scale-105 transition-all duration-300 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 bg-gradient-secondary text-white font-bold rounded-lg shadow-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 active:scale-95;
+  }
+
+  .btn-outline {
+    @apply px-6 py-3 border-2 border-primary text-primary font-bold rounded-lg hover:bg-primary/10 transition-all duration-300;
+  }
+
+  .card {
+    @apply bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6;
+  }
+
+  .card-hover {
+    @apply card hover:border-primary hover:shadow-glow transition-all duration-300;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-white;
+  }
+
+  .badge {
+    @apply inline-block px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm font-semibold hover:bg-slate-200 transition-colors duration-300;
+  }
+
+  .badge-primary {
+    @apply badge bg-primary/10 text-primary hover:bg-primary/20;
+  }
+
+  .badge-secondary {
+    @apply badge bg-secondary/10 text-secondary hover:bg-secondary/20;
   }
 }

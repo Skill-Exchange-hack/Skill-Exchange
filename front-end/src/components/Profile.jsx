@@ -204,10 +204,15 @@ function Profile() {
       if (!res.ok) {
         const errorData = await res.json();
         console.error('バックエンドエラー:', errorData);
+        // 409 Conflictの場合（既に追加済み）
+        if (res.status === 409) {
+          setError('このスキルは既に追加されています');
+          return;
+        }
         throw new Error(
           errorData.errors
             ? Object.values(errorData.errors).flat().join(', ')
-            : `HTTP ${res.status}: ${res.statusText}`
+            : errorData.error || `HTTP ${res.status}: ${res.statusText}`
         );
       }
 
@@ -215,10 +220,49 @@ function Profile() {
       setDesired([...desired, newDesiredData]);
       setShowAddDesiredForm(false);
       setNewDesired({ skill_id: '', priority: 1 });
+      setError(null); // エラーをクリア
       console.log('習得したいスキルを追加しました:', newDesiredData);
     } catch (err) {
       console.error(err);
       setError('習得スキル追加に失敗しました: ' + err.message);
+    }
+  };
+
+  const handleDeleteUserSkill = async (skillId) => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/user-skills/${skillId}`,
+        {
+          method: 'DELETE',
+        }
+      );
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      setSkills(skills.filter((s) => s.id !== skillId));
+      console.log('スキルを削除しました:', skillId);
+    } catch (err) {
+      console.error(err);
+      setError('スキル削除に失敗しました: ' + err.message);
+    }
+  };
+
+  const handleDeleteDesiredSkill = async (desiredId) => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/desired-skills/${desiredId}`,
+        {
+          method: 'DELETE',
+        }
+      );
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      setDesired(desired.filter((d) => d.id !== desiredId));
+      console.log('習得したいスキルを削除しました:', desiredId);
+    } catch (err) {
+      console.error(err);
+      setError('習得スキル削除に失敗しました: ' + err.message);
     }
   };
 
@@ -370,13 +414,19 @@ function Profile() {
               </p>
             ) : (
               skills.map((skill) => (
-                <div key={skill.id} className="animate-fade-in">
+                <div key={skill.id} className="animate-fade-in relative group">
                   <span className="inline-block px-5 py-2 bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-800 rounded-full text-sm font-bold border-2 border-emerald-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110">
                     {skill.skill ? skill.skill.name : skill.name}
                     <span className="ml-2 text-emerald-600 font-bold">
                       Lv{skill.level || '?'}
                     </span>
                   </span>
+                  <button
+                    onClick={() => handleDeleteUserSkill(skill.id)}
+                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ✕
+                  </button>
                 </div>
               ))
             )}
@@ -459,13 +509,19 @@ function Profile() {
               </p>
             ) : (
               desired.map((d) => (
-                <div key={d.id} className="animate-fade-in">
+                <div key={d.id} className="animate-fade-in relative group">
                   <span className="inline-block px-5 py-2 bg-gradient-to-r from-cyan-100 to-cyan-50 text-cyan-800 rounded-full text-sm font-bold border-2 border-cyan-300 shadow-md hover:shadow-lg transition-all transform hover:scale-110">
                     {d.skill ? d.skill.name : d.name}
                     <span className="ml-2 text-cyan-600 font-bold">
                       優先度{d.priority}
                     </span>
                   </span>
+                  <button
+                    onClick={() => handleDeleteDesiredSkill(d.id)}
+                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ✕
+                  </button>
                 </div>
               ))
             )}

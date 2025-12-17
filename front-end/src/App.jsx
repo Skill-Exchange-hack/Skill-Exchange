@@ -7,6 +7,8 @@ import MatchesPage from './pages/MatchesPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import MessagePage from './pages/MessagePage';
+import ChatRoomsPage from './pages/ChatRoomsPage';
+import ChatPage from './pages/ChatPage';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/messages/:id" element={<MessagePage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/chat-rooms" element={<ChatRoomsPage />} />
+        <Route path="/chat/:chatRoomId" element={<ChatPage />} />{' '}
       </Routes>
     </BrowserRouter>
   );
