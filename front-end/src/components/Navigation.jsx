@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import '../styles/Navigation.css';
+import skillExchangeLogo from '../image.png';
 
 function Navigation() {
   const location = useLocation();
@@ -13,7 +13,7 @@ function Navigation() {
     }
   });
 
-  // update user state when route changes (login redirects will update nav)
+  // update user state when route changes
   useEffect(() => {
     try {
       setCurrentUser(JSON.parse(localStorage.getItem('currentUser')));
@@ -24,52 +24,112 @@ function Navigation() {
 
   const isActive = (path) => location.pathname === path;
 
-  const logout = () => {
-    try { localStorage.removeItem('currentUser'); } catch {}
-    setCurrentUser(null);
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser');
     navigate('/login');
   };
 
   return (
-    <nav className="navigation">
-      <div className="nav-brand">スキル交換</div>
-      <div className="nav-links">
-        <Link 
-          to="/" 
-          className={`nav-link ${isActive('/') ? 'active' : ''}`}
-        >
-          ホーム
-        </Link>
-        <Link
-          to="/matches"
-          className={`nav-link ${isActive('/matches') ? 'active' : ''}`}
-        >
-          マッチング
-        </Link>
-        <Link
-          to="/dashboard"
-          className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}
-        >
-          スキル一覧
-        </Link>
-        <Link 
-          to="/profile" 
-          className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
-        >
-          プロフィール
-        </Link>
-        <Link 
-          to="/settings" 
-          className={`nav-link ${isActive('/settings') ? 'active' : ''}`}
-        >
-          設定
-        </Link>
-        {currentUser ? (
-          <button onClick={logout} className={`nav-link nav-link--logout`}>ログアウト</button>
-        ) : (
-          <Link to="/login" className={`nav-link nav-link--login ${isActive('/login') ? 'active' : ''}`}>
-            ログイン
+    <nav className="bg-gradient-to-r from-slate-900 to-slate-800 px-8 py-5 shadow-2xl sticky top-0 z-50 border-b border-slate-700">
+      <div className="flex justify-between items-center">
+        <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <img
+            src={skillExchangeLogo}
+            alt="Skill Exchange Logo"
+            className="h-16 w-16"
+          />
+        </div>
+        <div className="flex gap-1">
+          <Link
+            to="/"
+            className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+              isActive('/')
+                ? 'bg-gradient-primary text-white shadow-lg'
+                : 'text-gray-300 hover:text-white hover:bg-slate-700'
+            }`}
+          >
+            🏠 ホーム
           </Link>
+          {currentUser && (
+            <>
+              <Link
+                to="/matches"
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  isActive('/matches')
+                    ? 'bg-gradient-primary text-white shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-slate-700'
+                }`}
+              >
+                🤝 マッチング
+              </Link>
+              <Link
+                to="/chat-rooms"
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  isActive('/chat-rooms')
+                    ? 'bg-gradient-primary text-white shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-slate-700'
+                }`}
+              >
+                💬 メッセージ
+              </Link>
+              <Link
+                to="/dashboard"
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  isActive('/dashboard')
+                    ? 'bg-gradient-primary text-white shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-slate-700'
+                }`}
+              >
+                📚 スキル一覧
+              </Link>
+              <Link
+                to="/profile"
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  isActive('/profile')
+                    ? 'bg-gradient-primary text-white shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-slate-700'
+                }`}
+              >
+                👤 プロフィール
+              </Link>
+            </>
+          )}
+          {!currentUser ? (
+            <>
+              <Link
+                to="/login"
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  isActive('/login')
+                    ? 'bg-gradient-primary text-white shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-slate-700'
+                }`}
+              >
+                🔓 ログイン
+              </Link>
+              <Link
+                to="/register"
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  isActive('/register')
+                    ? 'bg-gradient-primary text-white shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-slate-700'
+                }`}
+              >
+                📝 登録
+              </Link>
+            </>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="px-6 py-2 rounded-lg font-medium transition-all duration-300 text-gray-300 hover:text-white hover:bg-red-500/20 bg-red-500/10 border border-red-500/30"
+            >
+              🚪 ログアウト
+            </button>
+          )}
+        </div>
+        {currentUser && (
+          <div className="flex items-center gap-3 text-gray-300">
+            <span className="text-sm font-medium">👤 {currentUser.name}</span>
+          </div>
         )}
       </div>
     </nav>

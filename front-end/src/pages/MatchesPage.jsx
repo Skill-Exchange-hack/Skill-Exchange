@@ -1,204 +1,257 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
-import '../App.css';
+import { useEffect, useState } from 'react';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 function MatchesPage() {
-  const [matches, setMatches] = useState(() => {
-    try {
-      const raw = localStorage.getItem('matches');
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  // current user's skills and desired skills (from Profile)
-  const currentSkills = useMemo(() => {
-    try {
-      const raw = localStorage.getItem('skills');
-      return raw ? JSON.parse(raw) : ['React', 'JavaScript', 'CSS'];
-    } catch {
-      return ['React', 'JavaScript', 'CSS'];
-    }
-  }, []);
-
-  const currentDesired = useMemo(() => {
-    try {
-      const raw = localStorage.getItem('desiredSkills');
-      return raw ? JSON.parse(raw) : ['TypeScript', 'GraphQL'];
-    } catch {
-      return ['TypeScript', 'GraphQL'];
-    }
-  }, []);
-
-  // load other users (sample or from localStorage)
-  const users = useMemo(() => {
-    try {
-      const raw = localStorage.getItem('users');
-      if (raw) return JSON.parse(raw);
-    } catch {}
-
-    // sample users
-    return [
-      { id: 2, name: '山田 太郎', skills: ['React', 'Node.js'], desired: ['TypeScript'] },
-      { id: 3, name: '佐藤 花子', skills: ['Python', 'Django'], desired: ['React', 'JavaScript'] },
-      { id: 4, name: '鈴木 次郎', skills: ['TypeScript', 'GraphQL'], desired: ['Go'] },
-      { id: 5, name: '高橋 愛', skills: ['CSS', 'Design'], desired: ['React'] }
-    ];
-  }, []);
-
-  // compute mutual matches: user wants X and other can teach X, and other wants Y and current can teach Y
-  const potentialMatches = useMemo(() => {
-    const res = [];
-    users.forEach((u) => {
-      const teaches = u.skills.filter((s) => currentDesired.includes(s));
-      const wants = u.desired.filter((s) => currentSkills.includes(s));
-      if (teaches.length > 0 || wants.length > 0) {
-        res.push({
-          ...u,
-          matchSkills: teaches,
-          reciprocal: wants,
-          score: teaches.length + wants.length
-        });
-      }
-    });
-    // sort by score desc
-    return res.sort((a, b) => b.score - a.score);
-  }, [users, currentDesired, currentSkills]);
-
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
   const navigate = useNavigate();
 
-  const [skillQuery, setSkillQuery] = useState('');
+  const [allUsers, setAllUsers] = useState([]);
+  const [currentUserSkills, setCurrentUserSkills] = useState([]);
+  const [matches, setMatches] = useState([]);
+  const [userSkillsMap, setUserSkillsMap] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const searchResults = useMemo(() => {
-    const q = skillQuery.trim().toLowerCase();
-    if (!q) return [];
-    return users
-      .map((u) => {
-        const matched = u.skills.find((s) => s.toLowerCase().includes(q));
-        if (matched) return { ...u, matchedSkill: matched, matchSkills: [matched] };
-        return null;
-      })
-      .filter(Boolean);
-  }, [users, skillQuery]);
+  // ユーザーが登録されていない場合はリダイレクト
+  useEffect(() => {
+    if (!currentUser || !currentUser.id) {
+      navigate('/register');
+    }
+  }, [currentUser, navigate]);
 
   useEffect(() => {
-    localStorage.setItem('matches', JSON.stringify(matches));
-  }, [matches]);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // すべてのスキルを取得
+        const allSkillsRes = await fetch('http://localhost:8000/api/skills');
+        if (!allSkillsRes.ok) {
+          throw new Error(`スキル一覧取得エラー: ${allSkillsRes.status}`);
+        }
+        const allSkillsData = await allSkillsRes.json();
+        const skillMap = {};
+        allSkillsData.forEach((skill) => {
+          skillMap[skill.id] = skill;
+        });
+
+        // バックエンドからマッチングユーザーを取得
+        const matchingUsersRes = await fetch(
+          `http://localhost:8000/api/users/matching?user_id=${currentUser.id}`
+        );
+        if (!matchingUsersRes.ok) {
+          throw new Error(
+            `マッチングユーザー取得エラー: ${matchingUsersRes.status}`
+          );
+        }
+        const matchingUsersData = await matchingUsersRes.json();
+        setAllUsers(matchingUsersData);
+
+        // 各ユーザーのスキルを取得
+        const userSkillsMapTemp = {};
+        for (const user of matchingUsersData) {
+          const skillRes = await fetch(
+            `http://localhost:8000/api/user-skills?user_id=${user.id}`
+          );
+          if (skillRes.ok) {
+            const skillData = await skillRes.json();
+            userSkillsMapTemp[user.id] = skillData.map((us) => ({
+              ...us,
+              skill: skillMap[us.skill_id] || { name: '不明', category: '' },
+            }));
+          }
+        }
+        setUserSkillsMap(userSkillsMapTemp);
+
+        // 現在のユーザーのスキル取得
+        const skillsRes = await fetch(
+          `http://localhost:8000/api/user-skills?user_id=${currentUser.id}`
+        );
+        if (!skillsRes.ok) {
+          throw new Error(`スキル取得エラー: ${skillsRes.status}`);
+        }
+        const skillsData = await skillsRes.json();
+        setCurrentUserSkills(skillsData);
+
+        // 現在のユーザーの欲しいスキル取得
+        const desiredRes = await fetch(
+          `http://localhost:8000/api/desired-skills?user_id=${currentUser.id}`
+        );
+        if (!desiredRes.ok) {
+          throw new Error(`欲しいスキル取得エラー: ${desiredRes.status}`);
+        }
+
+        // マッチング情報取得
+        const matchesRes = await fetch(
+          'http://localhost:8000/api/user-matches'
+        );
+        if (!matchesRes.ok) {
+          throw new Error(`マッチング取得エラー: ${matchesRes.status}`);
+        }
+        const matchesData = await matchesRes.json();
+        setMatches(matchesData);
+      } catch (err) {
+        setError('データの取得に失敗しました: ' + err.message);
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentUser && currentUser.id) {
+      fetchData();
+    }
+  }, [currentUser.id]);
 
   const connect = async (user) => {
-    const date = new Date().toISOString().slice(0, 10);
-    const skill = user.matchSkills[0] || user.reciprocal[0] || '';
-    const entry = {
-      id: Date.now(),
-      partner: user.name,
-      skill,
-      date
-    };
-    setMatches((m) => [entry, ...m]);
-
-    // navigate to message page after creating match
     try {
-      navigate(`/messages/${user.id}`, { state: { partnerName: user.name } });
-    } catch (e) {}
+      // 最初のスキルを取得（ない場合は1を使用）
+      const skillFromUser1 =
+        currentUserSkills.length > 0 ? currentUserSkills[0].skill_id : 1;
+      const skillFromUser2 = 1;
 
-    // Try to POST to backend; fail silently if not available
-    try {
-      await fetch('/api/user-matches', {
+      const response = await fetch('http://localhost:8000/api/user-matches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: 1, matched_user_id: user.id, status: 'pending' })
+        body: JSON.stringify({
+          user1_id: currentUser.id,
+          user2_id: user.id,
+          skill_from_user1: skillFromUser1,
+          skill_from_user2: skillFromUser2,
+          status: 'pending',
+        }),
       });
-    } catch (e) {
-      // ignore
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('マッチング作成成功:', data);
+
+      // チャットルームIDを取得してリダイレクト
+      const chatRoomId = data.chat_room_id;
+      navigate(`/chat/${chatRoomId}`, {
+        state: {
+          match: data.user_match,
+          otherUser: user,
+        },
+      });
+    } catch (err) {
+      alert('マッチング作成エラー: ' + err.message);
+      console.error(err);
     }
   };
 
-  return (
-    <div className="dashboard-container">
-      <aside className="sidebar">
-        <div className="brand">スキル交換</div>
-        <ul className="sidebar-menu">
-          <li><Link to="/">🏠 ホーム</Link></li>
-          <li className="active"><Link to="/matches">🤝 マッチング</Link></li>
-          <li><Link to="/dashboard">📚 スキル一覧</Link></li>
-          <li><Link to="/profile">👤 プロフィール</Link></li>
-          <li><Link to="/settings">⚙ 設定</Link></li>
-        </ul>
-      </aside>
+  if (!currentUser || !currentUser.id) {
+    return <div className="p-5">リダイレクト中...</div>;
+  }
 
-      <main className="main-content">
-        <header className="header">
-          <h1>マッチング</h1>
+  if (loading) return <LoadingSpinner />;
+
+  return (
+    <div className="flex flex-col min-h-screen bg-gradient-subtle">
+      <main className="flex-1 flex flex-col">
+        <header className="bg-white/95 backdrop-blur p-8 shadow-lg border-b border-slate-200">
+          <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            🤝 マッチング
+          </h1>
+          <p className="text-slate-600 mt-2">
+            他のユーザーとスキルを交換しましょう
+          </p>
         </header>
 
-        <section className="page-content">
-          <h2>おすすめのマッチ</h2>
-          <div className="activity-box">
-            {potentialMatches.length === 0 && <p>現在、表示するマッチがありません。</p>}
-            <ul className="matches-list">
-              {potentialMatches.map((m) => (
-                <li key={m.id} className="match-item">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div className="match-info"><strong>{m.name}</strong></div>
-                      <div className="match-sub">教えられる: {m.matchSkills.join(', ') || '—'}</div>
-                      <div className="match-sub">教わりたい: {m.reciprocal.join(', ') || '—'}</div>
+        {error && (
+          <div className="text-red-600 text-sm p-5 bg-red-50/95 m-5 rounded-xl border border-red-200 backdrop-blur font-semibold">
+            {error}
+          </div>
+        )}
+
+        <section className="p-8">
+          <h2 className="text-3xl font-bold text-slate-800 mb-6">
+            ✨ あなたがほしいスキルを持っているユーザーたち
+          </h2>
+          <div className="bg-white/95 backdrop-blur p-8 rounded-xl shadow-lg border border-slate-200">
+            {allUsers.length === 0 && (
+              <p className="text-slate-500 text-center py-8 text-lg">
+                👥 他のユーザーがいません。
+              </p>
+            )}
+            <ul className="flex flex-col gap-4">
+              {allUsers.map((user) => (
+                <li
+                  key={user.id}
+                  className="p-6 rounded-xl border-2 border-slate-200 bg-white hover:shadow-lg hover:border-emerald-300 transition-all duration-300 animate-fade-in"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="font-bold text-slate-800 text-lg">
+                        👤 {user.name}
+                      </div>
+                      <div className="text-sm text-slate-500 mt-1">
+                        📅 登録日:{' '}
+                        {new Date(user.created_at).toLocaleDateString('ja-JP')}
+                      </div>
+                      {userSkillsMap[user.id] &&
+                        userSkillsMap[user.id].length > 0 && (
+                          <div className="mt-3">
+                            <div className="text-sm font-semibold text-slate-700 mb-2">
+                              💡 保有スキル:
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {userSkillsMap[user.id].map((userSkill) => (
+                                <span
+                                  key={userSkill.id}
+                                  className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-medium"
+                                >
+                                  {userSkill.skill?.name || 'スキル'} (Lv.
+                                  {userSkill.level})
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                     </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button className="connect-btn" onClick={() => connect(m)}>接続</button>
-                    </div>
+                    <button
+                      className="bg-gradient-primary hover:shadow-lg text-white font-bold py-2 px-6 rounded-lg transition-all transform hover:scale-105 shadow-md ml-4 whitespace-nowrap"
+                      onClick={() => connect(user)}
+                    >
+                      🔗 接続
+                    </button>
                   </div>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* 検索：教わりたいスキルで講師を検索 */}
-          <div style={{ marginTop: 20 }} className="skill-search">
-            <label style={{ display: 'block', marginBottom: 8, color: '#333', fontWeight: 700 }}>講師を検索（教わりたいスキル）</label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                value={skillQuery}
-                onChange={(e) => setSkillQuery(e.target.value)}
-                placeholder="例: React, TypeScript"
-                className="skill-search-input"
-                onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
-              />
-              <button className="connect-btn" onClick={() => { /* no-op, results update live */ }}>検索</button>
-            </div>
+          <h2 className="text-3xl font-bold text-slate-800 mt-12 mb-6">
+            📋 マッチング履歴
+          </h2>
+          <div className="bg-white/95 backdrop-blur p-8 rounded-xl shadow-lg border border-slate-200">
+            <ul className="flex flex-col gap-4">
+              {matches.length === 0 && (
+                <p className="text-slate-500 text-center py-8 text-lg">
+                  📭 まだマッチングはありません。
+                </p>
+              )}
+              {matches.map((m) => {
+                // 相手ユーザーを特定
+                const otherUser =
+                  m.user1_id === currentUser.id ? m.user2 : m.user1;
 
-            {skillQuery.trim() !== '' && (
-              <div style={{ marginTop: 12 }}>
-                <div style={{ marginBottom: 8, color: '#444', fontWeight: 700 }}>検索結果</div>
-                <ul className="matches-list">
-                  {searchResults.length === 0 && <p style={{ color: '#666' }}>該当する講師が見つかりません。</p>}
-                  {searchResults.map((t) => (
-                    <li key={t.id} className="teacher-item match-item">
-                      <div>
-                        <div className="match-info"><strong>{t.name}</strong></div>
-                        <div className="match-sub">教えられる: {t.matchedSkill}</div>
-                      </div>
-                      <div>
-                        <button className="connect-btn" onClick={() => connect(t)}>接続</button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          <h2 style={{ marginTop: 24 }}>直近のマッチング</h2>
-          <div className="activity-box">
-            <ul className="matches-list">
-              {matches.length === 0 && <p>まだマッチングはありません。</p>}
-              {matches.map((m) => (
-                <li key={m.id} className="match-item">
-                  <div className="match-date">{m.date}</div>
-                  <div className="match-info">{m.partner} — {m.skill}</div>
-                </li>
-              ))}
+                return (
+                  <li
+                    key={m.id}
+                    className="p-4 rounded-xl border-2 border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 hover:shadow-md transition-all animate-fade-in"
+                  >
+                    <div className="text-sm text-slate-700 font-medium">
+                      💬 {otherUser.name}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </section>

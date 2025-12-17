@@ -50,3 +50,16 @@ CREATE TABLE matches (
     FOREIGN KEY (skill_from_user1) REFERENCES skills(id) ON DELETE CASCADE,
     FOREIGN KEY (skill_from_user2) REFERENCES skills(id) ON DELETE CASCADE
 );
+
+
+CREATE TABLE chat_messages (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    chat_room_id BIGINT NOT NULL,
+    sender_id BIGINT NOT NULL,
+    message TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (chat_room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_chat_room_created (chat_room_id, created_at)
+);

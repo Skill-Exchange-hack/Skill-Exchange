@@ -10,7 +10,9 @@ class UserMatch extends Model
     use HasFactory;
     protected $table = 'matches';
 
-    public $timestamps = false;
+    public $timestamps = true;
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = null;
 
     protected $fillable = [
         'user1_id', 'user2_id', 'skill_from_user1', 'skill_from_user2', 'status'
@@ -34,5 +36,17 @@ class UserMatch extends Model
     public function skillFromUser2()
     {
         return $this->belongsTo(Skill::class, 'skill_from_user2');
+    }
+
+    // チャットルームとの関係
+    public function chatRoom()
+    {
+        return $this->hasOne(ChatRoom::class, 'match_id');
+    }
+
+    // 2人のユーザーを取得
+    public function users()
+    {
+        return [$this->user1, $this->user2];
     }
 }

@@ -10,7 +10,9 @@ class User extends Model
 {
     use HasFactory;
 
-    public $timestamps = false; // created_at しかないので timestamps 無効
+    public $timestamps = true;
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = null; // updated_at がないので null に設定
 
     protected $fillable = ['name'];
 
@@ -35,5 +37,11 @@ class User extends Model
     public function matchesAsUser2()
     {
         return $this->hasMany(UserMatch::class, 'user2_id');
+    }
+
+    // 送信したチャットメッセージ
+    public function sentMessages()
+    {
+        return $this->hasMany(ChatMessage::class, 'sender_id');
     }
 }
