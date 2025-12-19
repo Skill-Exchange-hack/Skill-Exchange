@@ -283,24 +283,6 @@ function RecentMatches({ matches, currentUser }) {
                   相手:{' '}
                   <span className="text-blue-600">👤 {otherUser.name}</span>
                 </div>
-                <div className="text-lg font-semibold text-slate-800">
-                  ステータス:{' '}
-                  <span
-                    className={`font-bold ${
-                      m.status === 'accepted'
-                        ? 'text-emerald-600'
-                        : m.status === 'pending'
-                        ? 'text-yellow-600'
-                        : 'text-slate-600'
-                    }`}
-                  >
-                    {m.status === 'accepted'
-                      ? '✅ 承認済み'
-                      : m.status === 'pending'
-                      ? '⏳ 保留中'
-                      : '❌ ' + m.status}
-                  </span>
-                </div>
               </div>
             </div>
           </li>
