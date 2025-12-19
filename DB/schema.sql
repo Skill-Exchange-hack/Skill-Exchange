@@ -51,14 +51,21 @@ CREATE TABLE matches (
     FOREIGN KEY (skill_from_user2) REFERENCES skills(id) ON DELETE CASCADE
 );
 
--- 6. Chat_Messages（チャットメッセージ）
+-- 6. CHAT_ROOMS テーブル（チャットルーム）
+CREATE TABLE chat_rooms (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    match_id BIGINT NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE
+);
+
+-- 7. CHAT_MESSAGES テーブル（チャットメッセージ）
 CREATE TABLE chat_messages (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     chat_room_id BIGINT NOT NULL,
     sender_id BIGINT NOT NULL,
     message TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-
     FOREIGN KEY (chat_room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE,
     FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_chat_room_created (chat_room_id, created_at)
