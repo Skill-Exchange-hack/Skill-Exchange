@@ -1,112 +1,227 @@
-# Skill-Exchange
+# Skill-Exchange 🔄
 
-## このアプリケーションが解決すること
-スキルを交換し、プログラミング言語を身に着けることが出来るようにします。
-ユーザーの望む、適切なマッチングができるようにすることでチャットベースでユーザーが適切な課題を与えることで高速なフィードバックを得ることができます。
+<p align="center">
+  <strong>スキルマッチングプラットフォーム</strong><br>
+  プログラミングスキルを教え合い、共に成長できるマッチングサービス
+</p>
 
-## 開発手順
-チーム開発でのルールを定めてあるのでコードをpull,clone（ローカルに取り込む）前にWikiを見てほしいです。
+---
 
+## 📖 概要
 
-## ブランチ戦略
-Github Flowです。なのでブランチのマージ後は必ず削除をするようにしてください。
+Skill-Exchangeは、プログラミングスキルを持つユーザー同士をマッチングし、互いに教え合うことができるプラットフォームです。
 
-## フローの流れ（コンフリクト回避のため）
- - あらかじめmainリポジトリへのpushは禁止をしております。なのでフォルダを中心に役割を分けてなるべくコンフリクトを起こさない。
- - 各役割ごとにブランチを作りPRを行う。
- - プルリクエストの承認を自分で行わないこと
+**解決する課題**
+- 独学でのプログラミング学習における挫折
+- 適切なメンターを見つける難しさ
+- スキル習得における高速なフィードバックの不足
 
-## リポジトリ
-フロントエンド・バックエンドのプロジェクトを同じリポジトリで使用をします。（モノリポ）  
-そしてプロジェクトの名前はフロントエンドは**frontend**、バックエンドは**backend**にしてください。
+**ソリューション**
+- ユーザーの「持っているスキル」と「学びたいスキル」を登録
+- 最適なマッチングアルゴリズムで相互学習パートナーを提案
+- チャットベースで課題の出題とフィードバックを実現
 
-## 技術スタック
- - フロントエンド：React
- - バックエンド：Laravel
- - ミドルウェア：MySQL
+---
 
-## ホスティング先
- - フロントエンド（React）：Vercel or Heroku or CloudFront
- - バックエンド（Laravel）：Heroku or AWS
-※フロントエンド担当の方はホスティング先を決め次第norman6464に連絡ください。
+## 🛠️ 技術スタック
 
-## データベース設計（ER図）
-このカラムなどを参考にしてDOA（データ指向プログラミング）に沿ってUIなどを作ってください。出ないとデータベースの作り直し = 処理ロジック全体の作り直しがおき、Laravel → ReactのJSONデータのやり取りで不備が起きプロジェクトの遅延が起きます。  
+<h3>Frontend</h3>
+<a href="https://skillicons.dev">
+  <img src="https://skillicons.dev/icons?i=react,vite&theme=light" alt="Frontend">
+</a>
 
-[DOPの概念](https://zenn.dev/chillnn_tech/articles/e78a76f94ad45a)  
+<h3>Backend</h3>
+<a href="https://skillicons.dev">
+  <img src="https://skillicons.dev/icons?i=laravel,php&theme=light" alt="Backend">
+</a>
 
-**テーブル名**  
- - users
- - skills
- - user_skills
- - desired_skills
- - matches（マッチング）
- 
- **リレーションシップ**
- Nは一体多の多側です。  
- - Users ↔ UserSkills（1:N）
- - Users ↔ DesiredSkills（1:N）
- - Skills ↔ UserSkills（1:N）
- - Skills ↔ DesiredSkills（1:N）
- - Users ↔ Matches（1:N ×2）
- - Skills ↔ Matches（1:N ×2）
- 
+<h3>Database</h3>
+<a href="https://skillicons.dev">
+  <img src="https://skillicons.dev/icons?i=mysql,sqlite&theme=light" alt="Database">
+</a>
+
+<h3>Infrastructure / Hosting</h3>
+<a href="https://skillicons.dev">
+  <img src="https://skillicons.dev/icons?i=aws,vercel,cloudflare&theme=light" alt="Infrastructure">
+</a>
+
+<h3>Tools</h3>
+<a href="https://skillicons.dev">
+  <img src="https://skillicons.dev/icons?i=git,github&theme=light" alt="Tools">
+</a>
+
+---
+
+## 📐 アーキテクチャ
+
+```
+┌─────────────┐     JSON      ┌─────────────┐     SQL      ┌─────────────┐
+│   React     │ ◄──────────► │   Laravel   │ ◄──────────► │   MySQL     │
+│  (Frontend) │    REST API   │  (Backend)  │              │ (Database)  │
+└─────────────┘               └─────────────┘              └─────────────┘
+```
+
+**リポジトリ構成**: モノレポ（Frontend / Backend を同一リポジトリで管理）
+
+---
+
+## 📊 データベース設計
+
+### テーブル構成
+
+| テーブル名 | 説明 |
+|-----------|------|
+| `users` | ユーザー情報 |
+| `skills` | スキルマスタ |
+| `user_skills` | ユーザーが持つスキル |
+| `desired_skills` | ユーザーが学びたいスキル |
+| `matches` | マッチング情報 |
+
+### ER図
+
+```
+Users ──┬── 1:N ──► UserSkills ◄── N:1 ──┬── Skills
+        │                                  │
+        ├── 1:N ──► DesiredSkills ◄── N:1 ─┤
+        │                                  │
+        └── 1:N ──► Matches ◄── N:1 ───────┘
+```
+
 ![ER図](diagrams/image.png)
 
-## UI/UXの図
-norman6464のチャットにFigmaなどで完成させた図などをください。そしたらこちらでREADMEの編集をします。
+---
 
-## プロジェクト導入手順
-**フロントエンド（React）の場合**
-```
+## 🚀 セットアップ
+
+### 必要な環境
+
+- Node.js (v18以上推奨)
+- PHP (v8.1以上)
+- Composer
+
+### Frontend (React)
+
+```bash
+cd frontend
 npm install
+npm run dev
 ```
 
-**バックエンドの場合**
-```
+### Backend (Laravel)
+
+```bash
+cd backend
 composer install
-```
-node_modulesのインストール
-```
 npm install
+cp .env.example .env
+php artisan key:generate
 ```
 
-### 注意事項
+**データベースの設定**
 
-今回のバックエンドの導入手順の際に.envファイルの編集が必ず必要になります  
-なのでcodespaceなどで設定する際にはnorman6464に連絡をください。
-
-Laravelは今回APIサーバーとして起動をしているのでphp artisan serveコマンドを打った際にはpunlic/index.phpのファイルはレンダリングをしません。  
-
-なので設定では必ずjson形式でデータを返すようにできています。
-
-
-### 現在のバックエンドの変更
-1. CRUDの実装完了
-2. routes/api.phpの編集
-3. config/cors.phpの編集（ローカルのReactのポートのみ使用許可）
-4. SQLiteのデータベース変更
-
-## フロントエンドの人がバックエンドを動かす手順
-1. composer install コマンド
-2. .envファイルの編集
-3. database/database.sqliteのファイルを作成
-4. php artisan migrate コマンド
-
-
-あとはcurlコマンドで確かめる
-
+```bash
+# SQLiteを使用する場合
+touch database/database.sqlite
+php artisan migrate
 ```
+
+**サーバー起動**
+
+```bash
+php artisan serve
+```
+
+---
+
+## 🔌 API エンドポイント
+
+### ユーザー作成
+
+```bash
 curl -X POST http://127.0.0.1:8000/api/users \
      -H "Content-Type: application/json" \
      -H "Accept: application/json" \
      -d '{"name":"norman"}'
 ```
 
-```
+### ユーザー一覧取得
+
+```bash
 curl -X GET http://127.0.0.1:8000/api/users \
      -H "Accept: application/json"
-
 ```
 
-この二つのコマンドでJSONの返却
+---
+
+## 👥 チーム開発ルール
+
+### ブランチ戦略
+
+**GitHub Flow**を採用しています。
+
+```
+main ◄─── feature/xxx ◄─── 作業ブランチ
+      PR & Review
+```
+
+- `main`への直接pushは禁止
+- 機能ごとにブランチを作成し、PRを提出
+- PRの承認は本人以外が行う
+- マージ後はブランチを削除
+
+### コンフリクト回避
+
+- フォルダ単位で担当を分担
+- PRは小さく、こまめに作成
+
+---
+
+## 📁 ディレクトリ構成
+
+```
+Skill-Exchange/
+├── frontend/          # React アプリケーション
+│   ├── src/
+│   └── package.json
+├── backend/           # Laravel API サーバー
+│   ├── app/
+│   ├── routes/
+│   │   └── api.php    # APIルーティング
+│   ├── config/
+│   │   └── cors.php   # CORS設定
+│   └── composer.json
+├── diagrams/          # 設計図
+└── README.md
+```
+
+---
+
+## ✅ 実装状況
+
+- [x] CRUD機能の実装
+- [x] APIルーティング (routes/api.php)
+- [x] CORS設定 (config/cors.php)
+- [x] SQLiteデータベース対応
+- [x] マッチングアルゴリズム
+- [x] チャット機能
+- [x] UI/UX実装
+
+---
+
+## 📝 注意事項
+
+- `.env`ファイルの設定が必要です。詳細は [@norman6464](https://github.com/norman6464) にお問い合わせください
+- LaravelはAPIサーバーとして動作するため、`public/index.php`のレンダリングは行いません
+- すべてのレスポンスはJSON形式で返却されます
+
+---
+
+## 👨‍💻 開発メンバー
+
+- [@norman6464](https://github.com/norman6464) - Backend / Infrastructure
+
+---
+
+## 📄 ライセンス
+
+MIT License
