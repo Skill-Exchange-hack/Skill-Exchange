@@ -218,7 +218,11 @@ Skill-Exchange/
 
 ## 👨‍💻 開発メンバー
 
-- [@norman6464](https://github.com/norman6464) - Backend / Infrastructure
+- [@norman6464](https://github.com/norman6464) - Backend / Infrastructure / Scrum Master
+- [@Yamamoto8810](https://github.com/Yamamoto8810) - Frontend / Project Reader
+- [@ShoKino5335](https://github.com/ShoKino5335) - Frontend / Infrastructure
+- [@inuzakakeno](https://github.com/inuzakakeno) - Planning / proposal
+ 
 
 ---
 
